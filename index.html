@@ -1297,19 +1297,19 @@
     doc.text(`Date: ${resultsData.date || 'N/A'}`, 120, 35);
     doc.text(`Prepared By: ${resultsData.preparedBy || 'N/A'}`, 120, 42);
 
-    // Wall Parameters table with forced numeric conversion and fallbacks
-    const safeWallLength = !isNaN(parseFloat(resultsData.wallLength)) ? parseFloat(resultsData.wallLength).toFixed(2) : 'N/A';
-    const safeWallHeight = !isNaN(parseFloat(resultsData.wallHeight)) ? parseFloat(resultsData.wallHeight).toFixed(2) : 'N/A';
-    const safeWallArea = !isNaN(parseFloat(resultsData.wallArea)) ? parseFloat(resultsData.wallArea).toFixed(2) : 'N/A';
-    console.log('Wall Params for PDF (safe values):', { safeWallLength, safeWallHeight, safeWallArea });
+    // Wall Parameters table - Use direct access with basic fallback
+    const wallLength = resultsData.wallLength || 0;
+    const wallHeight = resultsData.wallHeight || 0;
+    const wallArea = resultsData.wallArea || 0;
+    console.log('Wall Params for PDF:', { wallLength, wallHeight, wallArea });
 
     doc.autoTable({
         startY: 60,
         head: [['Wall Parameters']],
         body: [
-            ['Length', `${safeWallLength} m`],
-            ['Height', `${safeWallHeight} m`],
-            ['Area', `${safeWallArea} m²`]
+            ['Length', `${wallLength.toFixed(2)} m`],
+            ['Height', `${wallHeight.toFixed(2)} m`],
+            ['Area', `${wallArea.toFixed(2)} m²`]
         ],
         theme: 'striped',
         headStyles: { fillColor: [44, 62, 80] },
