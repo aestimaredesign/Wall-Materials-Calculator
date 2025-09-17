@@ -1281,12 +1281,11 @@
 
     const currencySymbol = resultsData.currencySymbol || '';
 
-    // Debug: Log resultsData and wall parameters to verify data
+    // Debug: Log resultsData to check if wall parameters are present
     console.log('ResultsData in PDF:', resultsData);
-    const wallLength = resultsData.wallLength || 0;
-    const wallHeight = resultsData.wallHeight || 0;
-    const wallArea = resultsData.wallArea || 0;
-    console.log('Wall Params for PDF:', { wallLength, wallHeight, wallArea });
+    console.log('Wall Length:', resultsData.wallLength);
+    console.log('Wall Height:', resultsData.wallHeight);
+    console.log('Wall Area:', resultsData.wallArea);
 
     // Set the title
     doc.setFontSize(22);
@@ -1301,31 +1300,30 @@
     doc.text(`Date: ${resultsData.date || 'N/A'}`, 120, 35);
     doc.text(`Prepared By: ${resultsData.preparedBy || 'N/A'}`, 120, 42);
 
-    // Wall Parameters table with explicit type conversion and debug
-    const wallParams = {
-        Length: Number(wallLength).toFixed(2),
-        Height: Number(wallHeight).toFixed(2),
-        Area: Number(wallArea).toFixed(2)
-    };
-    console.log('Formatted Wall Params:', wallParams);
+    // Wall Parameters table - Simplified two-column structure
+    const wallLength = resultsData.wallLength || 0;
+    const wallHeight = resultsData.wallHeight || 0;
+    const wallArea = resultsData.wallArea || 0;
+    console.log('Wall Params for PDF:', { wallLength, wallHeight, wallArea });
 
     doc.autoTable({
         startY: 60,
-        head: [['Wall Parameters']],
+        head: [['Wall Parameters', 'Value']],
         body: [
-            ['Length', `${wallParams.Length} m`],
-            ['Height', `${wallParams.Height} m`],
-            ['Area', `${wallParams.Area} m²`]
+            ['Length', `${wallLength.toFixed(2)} m`],
+            ['Height', `${wallHeight.toFixed(2)} m`],
+            ['Area', `${wallArea.toFixed(2)} m²`]
         ],
         theme: 'striped',
         headStyles: { fillColor: [44, 62, 80] },
         styles: { 
             cellPadding: 3, 
             fontSize: 10,
-            halign: 'left' // Ensure left alignment for clarity
+            halign: 'left'
         },
-        didDrawCell: (data) => {
-            console.log(`Drawing cell: ${data.section} - ${data.row.index} - ${data.cell.raw}`);
+        columnStyles: {
+            0: { fontStyle: 'bold' },
+            1: { halign: 'right' }
         }
     });
 
