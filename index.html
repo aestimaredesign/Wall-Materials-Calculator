@@ -1269,151 +1269,151 @@
         }
 
         function downloadPDF() {
+    console.log('Download PDF button clicked');
+
+    // Make sure resultsData is populated
     if (!window.resultsData) {
-        alert('Please calculate the results first.');
+        alert("Please calculate the results first.");
         return;
     }
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    const resultsData = window.resultsData;
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text("Wall Materials Calculation Summary", 14, 22);
 
-    const currencySymbol = resultsData.currencySymbol || '';
+    const projectInfoData = getProjectInfoData();
+    const wallParametersData = getWallParametersData();
+    const materialData = getMaterialTableData();
+    const accessoryData = getAccessoryTableData();
+    const costSummaryData = getCostSummaryData();
 
-    // Debug: Log resultsData to check if wall parameters are present
-    console.log('ResultsData in PDF:', resultsData);
-    console.log('Wall Length:', resultsData.wallLength);
-    console.log('Wall Height:', resultsData.wallHeight);
-    console.log('Wall Area:', resultsData.wallArea);
-
-    // Set the title
-    doc.setFontSize(22);
-    doc.text("Wall Materials Calculation", 105, 20, null, null, "center");
-
-    // Set project details with fallbacks
-    doc.setFontSize(12);
-    doc.setTextColor(100);
-    doc.text(`Project Name: ${resultsData.projectName || 'N/A'}`, 20, 35);
-    doc.text(`Location: ${resultsData.projectLocation || 'N/A'}`, 20, 42);
-    doc.text(`Client: ${resultsData.clientName || 'N/A'}`, 20, 49);
-    doc.text(`Date: ${resultsData.date || 'N/A'}`, 120, 35);
-    doc.text(`Prepared By: ${resultsData.preparedBy || 'N/A'}`, 120, 42);
-
-    // Wall Parameters table with labels and aligned values
-    const wallLength = resultsData.wallLength || 0;
-    const wallHeight = resultsData.wallHeight || 0;
-    const wallArea = resultsData.wallArea || 0;
-    console.log('Wall Params for PDF:', { wallLength, wallHeight, wallArea });
-
+    // Project Information Table
     doc.autoTable({
-        startY: 60,
-        head: [['Wall Parameters', 'Value']], // Header row
-        body: [
-            ['Length', `${wallLength.toFixed(2)} m`],
-            ['Height', `${wallHeight.toFixed(2)} m`],
-            ['Wall Area', `${wallArea.toFixed(2)} m²`]
-        ],
-        theme: 'plain', // No stripes for simplicity
-        headStyles: { 
-            fillColor: [44, 62, 80], 
-            textColor: [255, 255, 255], 
-            fontSize: 12,
-            halign: 'center'
-        },
-        bodyStyles: { 
-            fontSize: 12,
-            halign: 'left' // Left-align labels
-        },
-        columnStyles: {
-            0: { cellWidth: 80, halign: 'left' }, // Fixed width for labels
-            1: { cellWidth: 60, halign: 'center' } // Centered values under "Value"
-        },
-        margin: { left: 20 },
-        tableWidth: 140 // Total width to fit both columns
+        startY: 30,
+        head: [[{
+            content: 'Project Information',
+            colSpan: 2,
+            styles: { fontStyle: 'bold', halign: 'center' }
+        }]],
+        body: projectInfoData,
+        theme: 'plain',
+        styles: { fontSize: 12, cellPadding: 2 },
+        headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
+        columnStyles: { 0: { fontStyle: 'bold', minWidth: 50 } }
     });
 
-    // Material data with fallback
-    const materialData = Object.keys(resultsData.materials || {}).map(key => {
-        const mat = resultsData.materials[key];
-        return [
-            key,
-            `${mat.quantity || 0} ${mat.unit || ''}`,
-            `${currencySymbol}${!isNaN(mat.cost) ? parseFloat(mat.cost).toFixed(2) : '0.00'}`
-        ];
-    });
-
+    // Wall Parameters Table
     doc.autoTable({
         startY: doc.autoTable.previous.finalY + 10,
-        head: [['Material Layer', 'Quantity', 'Cost']],
-        body: materialData.length > 0 ? materialData : [['No Materials', '', '0.00']],
-        theme: 'striped',
-        headStyles: { fillColor: [44, 62, 80] },
-        styles: { cellPadding: 3, fontSize: 10 }
+        head: [[{
+            content: 'Wall Parameters',
+            colSpan: 2,
+            styles: { fontStyle: 'bold', halign: 'center' }
+        }]],
+        body: wallParametersData,
+        theme: 'plain',
+        styles: { fontSize: 12, cellPadding: 2 },
+        headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
+        columnStyles: { 0: { fontStyle: 'bold', minWidth: 50 } }
     });
 
-    // Accessory data with fallback
-    const accessoryData = Object.keys(resultsData.accessories || {}).map(key => {
-        const acc = resultsData.accessories[key];
-        return [
-            key,
-            `${acc.quantity || 0} ${acc.unit || ''}`,
-            `${currencySymbol}${!isNaN(acc.cost) ? parseFloat(acc.cost).toFixed(2) : '0.00'}`
-        ];
-    });
+    // Material Layers Table
+    if (materialData.length > 0) {
+        doc.autoTable({
+            startY: doc.autoTable.previous.finalY + 10,
+            head: [[{
+                content: 'Material Layers',
+                colSpan: 3,
+                styles: { fontStyle: 'bold', halign: 'center' }
+            }]],
+            body: materialData,
+            theme: 'plain',
+            styles: { fontSize: 12, cellPadding: 2 },
+            headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
+            columnStyles: { 0: { fontStyle: 'bold', minWidth: 50 } }
+        });
+    }
 
+    // Accessory Table
     if (accessoryData.length > 0) {
         doc.autoTable({
             startY: doc.autoTable.previous.finalY + 10,
-            head: [['Accessory', 'Quantity', 'Cost']],
+            head: [[{
+                content: 'Accessory Materials',
+                colSpan: 3,
+                styles: { fontStyle: 'bold', halign: 'center' }
+            }]],
             body: accessoryData,
-            theme: 'striped',
-            headStyles: { fillColor: [44, 62, 80] },
-            styles: { cellPadding: 3, fontSize: 10 }
+            theme: 'plain',
+            styles: { fontSize: 12, cellPadding: 2 },
+            headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
+            columnStyles: { 0: { fontStyle: 'bold', minWidth: 50 } }
         });
     }
 
-    // Plastering data with fallback
-    const plasteringData = Object.keys(resultsData.plastering || {}).map(key => {
-        const plas = resultsData.plastering[key];
-        return [
-            key,
-            `${plas.quantity || 0} ${plas.unit || ''}`,
-            `${currencySymbol}${!isNaN(plas.cost) ? parseFloat(plas.cost).toFixed(2) : '0.00'}`
-        ];
-    });
-
-    if (plasteringData.length > 0) {
-        doc.autoTable({
-            startY: doc.autoTable.previous.finalY + 10,
-            head: [['Plastering Material', 'Quantity', 'Cost']],
-            body: plasteringData,
-            theme: 'striped',
-            headStyles: { fillColor: [44, 62, 80] },
-            styles: { cellPadding: 3, fontSize: 10 }
-        });
-    }
-
-    // Cost summary with safe division
-    const safeDivide = (value, divisor) => !isNaN(parseFloat(value)) && parseFloat(divisor) > 0 ? parseFloat(value) / parseFloat(divisor) : 0;
-    const costSummaryData = [
-        ['Main Material Cost', `${currencySymbol}${!isNaN(parseFloat(resultsData.materialCost)) ? parseFloat(resultsData.materialCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.materialCost, resultsData.wallArea).toFixed(2)}/m²`],
-        ['Accessory Cost', `${currencySymbol}${!isNaN(parseFloat(resultsData.accessoryCost)) ? parseFloat(resultsData.accessoryCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.accessoryCost, resultsData.wallArea).toFixed(2)}/m²`],
-        ['Plastering Cost', `${currencySymbol}${!isNaN(parseFloat(resultsData.plasteringCost)) ? parseFloat(resultsData.plasteringCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.plasteringCost, resultsData.wallArea).toFixed(2)}/m²`],
-        ['Labor Cost', `${currencySymbol}${!isNaN(parseFloat(resultsData.laborCost)) ? parseFloat(resultsData.laborCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.laborCost, resultsData.wallArea).toFixed(2)}/m²`],
-        ['Contingency Cost', `${currencySymbol}${!isNaN(parseFloat(resultsData.contingency)) ? parseFloat(resultsData.contingency).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.contingency, resultsData.wallArea).toFixed(2)}/m²`],
-        ['Total Project Cost', `${currencySymbol}${!isNaN(parseFloat(resultsData.totalCost)) ? parseFloat(resultsData.totalCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.totalCost, resultsData.wallArea).toFixed(2)}/m²`]
-    ];
-
+    // Cost Summary Table
     doc.autoTable({
         startY: doc.autoTable.previous.finalY + 10,
         head: [['Cost Summary', 'Total Cost', 'Cost per m²']],
         body: costSummaryData,
         theme: 'striped',
         headStyles: { fillColor: [44, 62, 80] },
-        styles: { cellPadding: 3, fontSize: 10 }
+        styles: { fontSize: 12, cellPadding: 2 }
     });
 
-    doc.save('Wall_Materials_Calculation.pdf');
+    // Final download
+    doc.save("Wall Materials Calculation_Summary.pdf");
+}
+
+function getProjectInfoData() {
+    const { projectName, projectLocation, clientName, date, preparedBy } = window.resultsData;
+    return [
+        ['Project Name:', projectName || 'N/A'],
+        ['Project Location:', projectLocation || 'N/A'],
+        ['Client Name:', clientName || 'N/A'],
+        ['Date:', date || 'N/A'],
+        ['Prepared By:', preparedBy || 'N/A']
+    ];
+}
+
+function getWallParametersData() {
+    const { wallLength, wallHeight, wallArea } = window.resultsData;
+    return [
+        ['Length:', `${wallLength.toFixed(2)} m`],
+        ['Height:', `${wallHeight.toFixed(2)} m`],
+        ['Wall Area:', `${wallArea.toFixed(2)} m²`]
+    ];
+}
+
+function getMaterialTableData() {
+    const materials = [];
+    for (const [name, data] of Object.entries(window.resultsData.materials || {})) {
+        materials.push([name, `${data.quantity} ${data.unit}`, `${window.resultsData.currencySymbol}${data.cost.toFixed(2)}`]);
+    }
+    return materials.length > 0 ? materials : [['No Materials', '', '0.00']];
+}
+
+function getAccessoryTableData() {
+    const accessories = [];
+    for (const [name, data] of Object.entries(window.resultsData.accessories || {})) {
+        accessories.push([name, `${data.quantity} ${data.unit}`, `${window.resultsData.currencySymbol}${data.cost.toFixed(2)}`]);
+    }
+    return accessories.length > 0 ? accessories : [['No Accessories', '', '0.00']];
+}
+
+function getCostSummaryData() {
+    const { currencySymbol, materialCost, accessoryCost, plasteringCost, laborCost, contingency, totalCost, wallArea } = window.resultsData;
+    const safeDivide = (value, divisor) => !isNaN(parseFloat(value)) && parseFloat(divisor) > 0 ? (parseFloat(value) / parseFloat(divisor)).toFixed(2) : '0.00';
+    return [
+        ['Main Material Cost', `${currencySymbol}${materialCost.toFixed(2)}`, `${currencySymbol}${safeDivide(materialCost, wallArea)}/m²`],
+        ['Accessory Cost', `${currencySymbol}${accessoryCost.toFixed(2)}`, `${currencySymbol}${safeDivide(accessoryCost, wallArea)}/m²`],
+        ['Plastering Cost', `${currencySymbol}${plasteringCost.toFixed(2)}`, `${currencySymbol}${safeDivide(plasteringCost, wallArea)}/m²`],
+        ['Labor Cost', `${currencySymbol}${laborCost.toFixed(2)}`, `${currencySymbol}${safeDivide(laborCost, wallArea)}/m²`],
+        ['Contingency Cost', `${currencySymbol}${contingency.toFixed(2)}`, `${currencySymbol}${safeDivide(contingency, wallArea)}/m²`],
+        ['Total Cost', `${currencySymbol}${totalCost.toFixed(2)}`, `${currencySymbol}${safeDivide(totalCost, wallArea)}/m²`]
+    ];
 }
         function getCurrencySymbol(currency) {
             switch (currency) {
