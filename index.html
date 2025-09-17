@@ -1093,34 +1093,34 @@
                 return materialType === 'chb' || materialType === 'aac';
             });
             if (isMasonry) {
-                const mortarVolume = wallArea * 0.01;
-                const mortarCementBags = Math.ceil((mortarVolume * 0.25) / 0.025 * (1 + wasteFactors['chb']));
-                const mortarSandTons = mortarVolume * 0.75 * 1.6 * (1 + wasteFactors['chb']);
-                const mortarWater = mortarVolume * 0.5;
+    const mortarVolume = wallArea * 0.01; // Assuming 1 cm mortar layer per m²
+    const mortarCementBags = Math.ceil((mortarVolume * 0.25) / 0.025 * (1 + wasteFactors['chb']));
+    const mortarSandCubicMeters = mortarVolume * 0.75 * (1 + wasteFactors['chb']); // Sand in m³
+    const mortarWater = mortarVolume * 0.5;
 
-                accessoryResults['Mortar Cement'] = { quantity: isNaN(mortarCementBags) ? 0 : mortarCementBags.toFixed(0), cost: isNaN(mortarCementBags * mortarCementCost) ? 0 : (mortarCementBags * mortarCementCost), unit: 'bags' };
-                accessoryResults['Mortar Sand'] = { quantity: isNaN(mortarSandTons) ? 0 : mortarSandTons.toFixed(2), cost: isNaN(mortarSandTons * mortarSandCost) ? 0 : (mortarSandTons * mortarSandCost), unit: 'tons' };
-                accessoryResults['Mortar Water'] = { quantity: isNaN(mortarWater) ? 0 : mortarWater.toFixed(2), cost: isNaN(mortarWater * mortarWaterCost) ? 0 : (mortarWater * mortarWaterCost), unit: 'm³' };
+    accessoryResults['Mortar Cement'] = { quantity: isNaN(mortarCementBags) ? 0 : mortarCementBags.toFixed(0), cost: isNaN(mortarCementBags * mortarCementCost) ? 0 : (mortarCementBags * mortarCementCost), unit: 'bags' };
+    accessoryResults['Mortar Sand'] = { quantity: isNaN(mortarSandCubicMeters) ? 0 : mortarSandCubicMeters.toFixed(2), cost: isNaN(mortarSandCubicMeters * mortarSandCost) ? 0 : (mortarSandCubicMeters * mortarSandCost), unit: 'm³' };
+    accessoryResults['Mortar Water'] = { quantity: isNaN(mortarWater) ? 0 : mortarWater.toFixed(2), cost: isNaN(mortarWater * mortarWaterCost) ? 0 : (mortarWater * mortarWaterCost), unit: 'm³' };
 
-                totalAccessoryCost += (mortarCementBags * mortarCementCost) + (mortarSandTons * mortarSandCost) + (mortarWater * mortarWaterCost);
-            }
+    totalAccessoryCost += (mortarCementBags * mortarCementCost) + (mortarSandCubicMeters * mortarSandCost) + (mortarWater * mortarWaterCost);
+}
 
-            let plasteringArea = 0;
-            if (plasterSide1) plasteringArea += wallArea;
-            if (plasterSide2) plasteringArea += wallArea;
+let plasteringArea = 0;
+if (plasterSide1) plasteringArea += wallArea;
+if (plasterSide2) plasteringArea += wallArea;
 
-            if (plasteringArea > 0 && !isNaN(plasterThickness)) {
-                const plasterVolume = plasteringArea * (plasterThickness / 1000);
-                const plasterCementBags = Math.ceil((plasterVolume * 0.25) / 0.025);
-                const plasterSandTons = plasterVolume * 0.75 * 1.6;
-                const plasterWater = plasterVolume * 0.5;
+if (plasteringArea > 0 && !isNaN(plasterThickness)) {
+    const plasterVolume = plasteringArea * (plasterThickness / 1000);
+    const plasterCementBags = Math.ceil((plasterVolume * 0.25) / 0.025);
+    const plasterSandCubicMeters = plasterVolume * 0.75; // Sand in m³
+    const plasterWater = plasterVolume * 0.5;
 
-                plasteringResults['Plaster Cement'] = { quantity: isNaN(plasterCementBags) ? 0 : plasterCementBags.toFixed(0), cost: isNaN(plasterCementBags * plasterCementCost) ? 0 : (plasterCementBags * plasterCementCost), unit: 'bags' };
-                plasteringResults['Plaster Sand'] = { quantity: isNaN(plasterSandTons) ? 0 : plasterSandTons.toFixed(2), cost: isNaN(plasterSandTons * plasterSandCost) ? 0 : (plasterSandTons * plasterSandCost), unit: 'tons' };
-                plasteringResults['Plaster Water'] = { quantity: isNaN(plasterWater) ? 0 : plasterWater.toFixed(2), cost: isNaN(plasterWater * plasterWaterCost) ? 0 : (plasterWater * plasterWaterCost), unit: 'm³' };
+    plasteringResults['Plaster Cement'] = { quantity: isNaN(plasterCementBags) ? 0 : plasterCementBags.toFixed(0), cost: isNaN(plasterCementBags * plasterCementCost) ? 0 : (plasterCementBags * plasterCementCost), unit: 'bags' };
+    plasteringResults['Plaster Sand'] = { quantity: isNaN(plasterSandCubicMeters) ? 0 : plasterSandCubicMeters.toFixed(2), cost: isNaN(plasterSandCubicMeters * plasterSandCost) ? 0 : (plasterSandCubicMeters * plasterSandCost), unit: 'm³' };
+    plasteringResults['Plaster Water'] = { quantity: isNaN(plasterWater) ? 0 : plasterWater.toFixed(2), cost: isNaN(plasterWater * plasterWaterCost) ? 0 : (plasterWater * plasterWaterCost), unit: 'm³' };
 
-                totalPlasteringCost = (plasterCementBags * plasterCementCost) + (plasterSandTons * plasterSandCost) + (plasterWater * plasterWaterCost);
-            }
+    totalPlasteringCost = (plasterCementBags * plasterCementCost) + (plasterSandCubicMeters * plasterSandCost) + (plasterWater * plasterWaterCost);
+}
 
             const laborCost = wallArea * laborCostPerSqM;
             const totalProjectCost = totalMaterialCost + totalAccessoryCost + totalPlasteringCost + laborCost;
@@ -1248,18 +1248,19 @@
         }
 
         function downloadPDF() {
-    if (!resultsData) {
+    if (!window.resultsData) {
         alert('Please calculate the results first.');
         return;
     }
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
+    const resultsData = window.resultsData; // Explicitly use the global resultsData
 
     const currencySymbol = resultsData.currencySymbol || '';
 
     // Debug: Log resultsData to check if wall parameters are present
-    console.log('ResultsData before PDF:', resultsData);
+    console.log('ResultsData in PDF:', resultsData);
 
     // Set the title
     doc.setFontSize(22);
@@ -1275,9 +1276,9 @@
     doc.text(`Prepared By: ${resultsData.preparedBy || 'N/A'}`, 120, 42);
 
     // Wall Parameters table with forced numeric conversion and fallbacks
-    const safeWallLength = !isNaN(resultsData.wallLength) ? parseFloat(resultsData.wallLength).toFixed(2) : 'N/A';
-    const safeWallHeight = !isNaN(resultsData.wallHeight) ? parseFloat(resultsData.wallHeight).toFixed(2) : 'N/A';
-    const safeWallArea = !isNaN(resultsData.wallArea) ? parseFloat(resultsData.wallArea).toFixed(2) : 'N/A';
+    const safeWallLength = !isNaN(parseFloat(resultsData.wallLength)) ? parseFloat(resultsData.wallLength).toFixed(2) : 'N/A';
+    const safeWallHeight = !isNaN(parseFloat(resultsData.wallHeight)) ? parseFloat(resultsData.wallHeight).toFixed(2) : 'N/A';
+    const safeWallArea = !isNaN(parseFloat(resultsData.wallArea)) ? parseFloat(resultsData.wallArea).toFixed(2) : 'N/A';
     console.log('Wall Params for PDF (safe values):', { safeWallLength, safeWallHeight, safeWallArea });
 
     doc.autoTable({
@@ -1355,14 +1356,14 @@
     }
 
     // Cost summary with safe division
-    const safeDivide = (value, divisor) => !isNaN(value) && divisor > 0 ? parseFloat(value) / divisor : 0;
+    const safeDivide = (value, divisor) => !isNaN(parseFloat(value)) && parseFloat(divisor) > 0 ? parseFloat(value) / parseFloat(divisor) : 0;
     const costSummaryData = [
-        ['Main Material Cost', `${currencySymbol}${!isNaN(resultsData.materialCost) ? parseFloat(resultsData.materialCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.materialCost, resultsData.wallArea).toFixed(2)}/m²`],
-        ['Accessory Cost', `${currencySymbol}${!isNaN(resultsData.accessoryCost) ? parseFloat(resultsData.accessoryCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.accessoryCost, resultsData.wallArea).toFixed(2)}/m²`],
-        ['Plastering Cost', `${currencySymbol}${!isNaN(resultsData.plasteringCost) ? parseFloat(resultsData.plasteringCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.plasteringCost, resultsData.wallArea).toFixed(2)}/m²`],
-        ['Labor Cost', `${currencySymbol}${!isNaN(resultsData.laborCost) ? parseFloat(resultsData.laborCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.laborCost, resultsData.wallArea).toFixed(2)}/m²`],
-        ['Contingency Cost', `${currencySymbol}${!isNaN(resultsData.contingency) ? parseFloat(resultsData.contingency).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.contingency, resultsData.wallArea).toFixed(2)}/m²`],
-        ['Total Project Cost', `${currencySymbol}${!isNaN(resultsData.totalCost) ? parseFloat(resultsData.totalCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.totalCost, resultsData.wallArea).toFixed(2)}/m²`]
+        ['Main Material Cost', `${currencySymbol}${!isNaN(parseFloat(resultsData.materialCost)) ? parseFloat(resultsData.materialCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.materialCost, resultsData.wallArea).toFixed(2)}/m²`],
+        ['Accessory Cost', `${currencySymbol}${!isNaN(parseFloat(resultsData.accessoryCost)) ? parseFloat(resultsData.accessoryCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.accessoryCost, resultsData.wallArea).toFixed(2)}/m²`],
+        ['Plastering Cost', `${currencySymbol}${!isNaN(parseFloat(resultsData.plasteringCost)) ? parseFloat(resultsData.plasteringCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.plasteringCost, resultsData.wallArea).toFixed(2)}/m²`],
+        ['Labor Cost', `${currencySymbol}${!isNaN(parseFloat(resultsData.laborCost)) ? parseFloat(resultsData.laborCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.laborCost, resultsData.wallArea).toFixed(2)}/m²`],
+        ['Contingency Cost', `${currencySymbol}${!isNaN(parseFloat(resultsData.contingency)) ? parseFloat(resultsData.contingency).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.contingency, resultsData.wallArea).toFixed(2)}/m²`],
+        ['Total Project Cost', `${currencySymbol}${!isNaN(parseFloat(resultsData.totalCost)) ? parseFloat(resultsData.totalCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.totalCost, resultsData.wallArea).toFixed(2)}/m²`]
     ];
 
     doc.autoTable({
