@@ -464,7 +464,7 @@
     <h2>Calculation Results</h2>
     <div id="message"></div>
     
-    <!-- Add these lines to display wall parameters -->
+    <!-- Wall parameters -->
     <h3>Wall Parameters</h3>
     <p><strong>Length:</strong> <span class="value" id="wallLengthResult"></span></p>
     <p><strong>Height:</strong> <span class="value" id="wallHeightResult"></span></p>
@@ -948,7 +948,8 @@
 
         function calculateResults(event) {
     event.preventDefault();
-    console.log('Calculate button clicked');
+    console.log('Calculate button clicked - function is being called');
+    
     const form = document.getElementById('calculatorForm');
     if (!form) {
         console.error('Form element not found');
@@ -1175,6 +1176,14 @@
 
         function displayResults() {
     console.log('Displaying results');
+    
+    // Check if resultsData exists
+    if (!window.resultsData) {
+        console.error('resultsData is not defined');
+        return;
+    }
+    
+    const resultsData = window.resultsData;
     const resultsDiv = document.getElementById('results');
     resultsDiv.style.display = 'block';
     document.getElementById('message').className = 'success';
