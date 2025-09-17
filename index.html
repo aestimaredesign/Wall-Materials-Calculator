@@ -570,20 +570,20 @@
             </div>
             <div class="formula-box">
                 <div class="formula-title">Accessories for Panel Systems:</div>
-                <div class="formula-item">Studs = Ceiling(Length / 0.6) × Height × Plies</div>
-                <div class="formula-item">Tracks = 2 × Length × Plies</div>
-                <div class="formula-item">Screws = Ceiling(Wall Area × 25) × Plies</div>
-                <div class="formula-item">Joint Compound = Wall Area × 0.5 × Plies</div>
-                <div class="formula-item">Sealant = Length × 0.1</div>
-                <div class="formula-item">Connectors = Ceiling(Wall Area / 2)</div>
+                <div class="formula-item">Studs = Ceiling(Length / 0.6) × Height × Plies × (Side Factor)</div>
+                <div class="formula-item">Tracks = 2 × Length × Plies × (Side Factor)</div>
+                <div class="formula-item">Screws = Ceiling(Wall Area × 25) × Plies × (Side Factor)</div>
+                <div class="formula-item">Joint Compound = Wall Area × 0.5 × Plies × (Side Factor)</div>
+                <div class="formula-item">Sealant = Length × 0.1 × (Side Factor)</div>
+                <div class="formula-item">Connectors = Ceiling(Wall Area / 2) × (Side Factor)</div>
             </div>
             <div class="formula-box">
                 <div class="formula-title">Accessories for Masonry Systems:</div>
-                <div class="formula-item">Mortar Volume = Wall Area × 0.01</div>
+                <div class="formula-item">Mortar Volume = Wall Area × 0.01 × (Side Factor)</div>
                 <div class="formula-item">Mortar Cement Bags = Ceiling(Mortar Volume × 0.25 / 0.025 × (1 + Waste Factor%))</div>
                 <div class="formula-item">Mortar Sand Tons = Mortar Volume × 0.75 × 1.6 × (1 + Waste Factor%)</div>
                 <div class="formula-item">Mortar Water = Mortar Volume × 0.5</div>
-                <div class="formula-item">Rebar Length = Wall Area × 0.1</div>
+                <div class="formula-item">Rebar Length = Wall Area × 0.1 × (Side Factor)</div>
             </div>
             <div class="formula-box">
                 <div class="formula-title">Labor Estimation:</div>
@@ -604,7 +604,7 @@
             </div>
         </div>
     </div>
-    <script>
+        <script>
         let resultsData = null;
         let materialCount = 0;
 
@@ -648,7 +648,8 @@
                 });
             });
         }
-                function addMaterial() {
+
+        function addMaterial() {
             materialCount++;
             const container = document.getElementById('materials-container');
             const materialCard = document.createElement('div');
@@ -690,6 +691,14 @@
                     <label class="plies-label">Number of Plies:
                         <input type="number" id="plies-${materialCount}" step="1" min="1" value="1" title="Number of plies for framed walls">
                     </label>
+                    <div class="side-selection">
+                        <div class="side-box">
+                            <label><input type="checkbox" id="side1-${materialCount}" checked> Side 1 (Framed)</label>
+                        </div>
+                        <div class="side-box">
+                            <label><input type="checkbox" id="side2-${materialCount}" checked> Side 2 (Framed)</label>
+                        </div>
+                    </div>
                 </div>
             `;
             container.appendChild(materialCard);
@@ -701,7 +710,6 @@
             if (materialCard) {
                 materialCard.remove();
                 materialCount = Math.max(0, materialCount - 1);
-                // Reindex remaining materials if needed (simplified approach)
                 const cards = document.querySelectorAll('.material-card');
                 cards.forEach((card, i) => {
                     card.querySelector('h3').textContent = `Material Layer ${i + 1}`;
@@ -740,7 +748,7 @@
                 config.dimensions.forEach(dimension => {
                     dimensionSelect.innerHTML += `<option value="${dimension}">${dimension}</option>`;
                 });
-                framedOptions.style.display = config.supportsPlies ? 'block' : 'none';
+                framedOptions.style.display = config.isFramedWall ? 'block' : 'none';
             }
         }
 
@@ -776,9 +784,12 @@
                     const wasteFactor = parseFloat(document.getElementById(`wasteFactor-${i}`).value) / 100 || 0;
                     const costPerUnit = parseFloat(document.getElementById(`materialCost-${i}`).value) || 0;
                     const plies = config.supportsPlies ? parseInt(document.getElementById(`plies-${i}`).value) || 1 : 1;
+                    const side1Framed = document.getElementById(`side1-${i}`).checked ? 1 : 0;
+                    const side2Framed = document.getElementById(`side2-${i}`).checked ? 1 : 0;
+                    const sideFactor = side1Framed + side2Framed; // 0, 1, or 2 sides framed
 
-                    const quantity = Math.ceil(wallArea / config.unitArea) * (1 + wasteFactor) * plies;
-                    materials.push({ type: config.name, quantity, costPerUnit, totalCost: quantity * costPerUnit, productivityRate: config.productivityRate });
+                    const quantity = Math.ceil(wallArea / config.unitArea) * (1 + wasteFactor) * plies * sideFactor;
+                    materials.push({ type: config.name, quantity, costPerUnit, totalCost: quantity * costPerUnit, productivityRate: config.productivityRate, sideFactor });
                     totalProductivityRate += config.productivityRate / materialCount;
                 }
             }
@@ -796,7 +807,7 @@
             let materialResultsHtml = '<ul>';
             let totalMaterialCost = 0;
             materials.forEach((mat, idx) => {
-                materialResultsHtml += `<li>${mat.type}: ${mat.quantity.toFixed(2)} ${materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === mat.type)].unit} (Cost: ${currencySymbol}${mat.totalCost.toFixed(2)})</li>`;
+                materialResultsHtml += `<li>${mat.type}: ${mat.quantity.toFixed(2)} ${materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === mat.type)].unit} (Cost: ${currencySymbol}${mat.totalCost.toFixed(2)}) - Sides: ${mat.sideFactor}</li>`;
                 totalMaterialCost += mat.totalCost;
             });
             materialResultsHtml += '</ul>';
@@ -806,7 +817,7 @@
             document.getElementById('currencySymbolMaterial').textContent = currencySymbol;
             document.getElementById('currencySymbolMaterialSqm').textContent = currencySymbol;
 
-                        // Accessory calculations
+             // Accessory calculations
             const studCost = parseFloat(document.getElementById('studCost').value) || 0;
             const trackCost = parseFloat(document.getElementById('trackCost').value) || 0;
             const screwCost = parseFloat(document.getElementById('screwCost').value) || 0;
@@ -819,44 +830,47 @@
             let accessoryResultsHtml = '<ul>';
             materials.forEach((mat) => {
                 const config = materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === mat.type)];
-                if (config.accessories.studs) {
-                    const studQty = Math.ceil(length / 0.6) * height * (config.supportsPlies ? parseInt(document.getElementById(`plies-${materials.indexOf(mat) + 1}`).value) || 1 : 1);
+                const index = materials.indexOf(mat) + 1;
+                const sideFactor = mat.sideFactor;
+
+                if (config.accessories.studs && sideFactor > 0) {
+                    const studQty = Math.ceil(length / 0.6) * height * (config.supportsPlies ? parseInt(document.getElementById(`plies-${index}`).value) || 1 : 1) * sideFactor;
                     const studTotal = studQty * studCost;
                     accessoryResultsHtml += `<li>Studs: ${studQty.toFixed(2)} m (Cost: ${currencySymbol}${studTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += studTotal;
                 }
-                if (config.accessories.tracks) {
-                    const trackQty = 2 * length * (config.supportsPlies ? parseInt(document.getElementById(`plies-${materials.indexOf(mat) + 1}`).value) || 1 : 1);
+                if (config.accessories.tracks && sideFactor > 0) {
+                    const trackQty = 2 * length * (config.supportsPlies ? parseInt(document.getElementById(`plies-${index}`).value) || 1 : 1) * sideFactor;
                     const trackTotal = trackQty * trackCost;
                     accessoryResultsHtml += `<li>Tracks: ${trackQty.toFixed(2)} m (Cost: ${currencySymbol}${trackTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += trackTotal;
                 }
-                if (config.accessories.screws) {
-                    const screwQty = Math.ceil(wallArea * 25) * (config.supportsPlies ? parseInt(document.getElementById(`plies-${materials.indexOf(mat) + 1}`).value) || 1 : 1);
+                if (config.accessories.screws && sideFactor > 0) {
+                    const screwQty = Math.ceil(wallArea * 25) * (config.supportsPlies ? parseInt(document.getElementById(`plies-${index}`).value) || 1 : 1) * sideFactor;
                     const screwTotal = screwQty * screwCost;
                     accessoryResultsHtml += `<li>Screws: ${screwQty.toFixed(2)} pieces (Cost: ${currencySymbol}${screwTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += screwTotal;
                 }
-                if (config.accessories.jointCompound) {
-                    const jointCompoundQty = wallArea * 0.5 * (config.supportsPlies ? parseInt(document.getElementById(`plies-${materials.indexOf(mat) + 1}`).value) || 1 : 1);
+                if (config.accessories.jointCompound && sideFactor > 0) {
+                    const jointCompoundQty = wallArea * 0.5 * (config.supportsPlies ? parseInt(document.getElementById(`plies-${index}`).value) || 1 : 1) * sideFactor;
                     const jointCompoundTotal = jointCompoundQty * jointCompoundCost;
                     accessoryResultsHtml += `<li>Joint Compound: ${jointCompoundQty.toFixed(2)} kg (Cost: ${currencySymbol}${jointCompoundTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += jointCompoundTotal;
                 }
-                if (config.accessories.sealants) {
-                    const sealantQty = length * 0.1;
+                if (config.accessories.sealants && sideFactor > 0) {
+                    const sealantQty = length * 0.1 * sideFactor;
                     const sealantTotal = sealantQty * sealantCost;
                     accessoryResultsHtml += `<li>Sealant: ${sealantQty.toFixed(2)} tubes (Cost: ${currencySymbol}${sealantTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += sealantTotal;
                 }
-                if (config.accessories.rebars) {
-                    const rebarQty = wallArea * 0.1;
+                if (config.accessories.rebars && sideFactor > 0) {
+                    const rebarQty = wallArea * 0.1 * sideFactor;
                     const rebarTotal = rebarQty * rebarCost;
                     accessoryResultsHtml += `<li>Rebar: ${rebarQty.toFixed(2)} m (Cost: ${currencySymbol}${rebarTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += rebarTotal;
                 }
-                if (config.accessories.connectors) {
-                    const connectorQty = Math.ceil(wallArea / 2);
+                if (config.accessories.connectors && sideFactor > 0) {
+                    const connectorQty = Math.ceil(wallArea / 2) * sideFactor;
                     const connectorTotal = connectorQty * connectorCost;
                     accessoryResultsHtml += `<li>Connectors: ${connectorQty.toFixed(2)} pieces (Cost: ${currencySymbol}${connectorTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += connectorTotal;
@@ -974,7 +988,7 @@
         }
 
         function downloadPDF() {
-            if (!resultsData) {
+            if (!resultsData || !resultsData.materials.length) {
                 displayError('No results to download. Please calculate first.');
                 return;
             }
@@ -997,7 +1011,7 @@
             y += 10;
             doc.text('Materials:', 10, y += 10);
             resultsData.materials.forEach((mat, idx) => {
-                doc.text(`${idx + 1}. ${mat.type}: ${mat.quantity.toFixed(2)} units (Cost: ${currencySymbol}${mat.totalCost.toFixed(2)})`, 10, y += 10);
+                doc.text(`${idx + 1}. ${mat.type}: ${mat.quantity.toFixed(2)} ${materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === mat.type)].unit} (Cost: ${currencySymbol}${mat.totalCost.toFixed(2)}) - Sides: ${mat.sideFactor}`, 10, y += 10);
             });
 
             y += 10;
