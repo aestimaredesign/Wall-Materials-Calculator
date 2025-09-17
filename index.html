@@ -461,72 +461,78 @@
                 <button type="submit" id="calculateButton">Calculate</button>
             </form>
             <div id="results" class="results" style="display:none;">
-                <h2>Calculation Results</h2>
-                <div id="message"></div>
-                <p><strong>Wall Area:</strong> <span class="value" id="wallArea"></span></p>
-                <div id="materialResults"></div>
-                <h3>Accessory Materials</h3>
-                <div id="accessoryResults"></div>
-                <div id="plasteringResultsContainer">
-                    <h3>Plastering Materials</h3>
-                    <div id="plasteringResults"></div>
-                </div>
-                <h3>Labor Details</h3>
-                <p><strong>Number of Laborers:</strong> <span class="value" id="laborersResult"></span></p>
-                <p><strong>Productivity Rate:</strong> <span class="value" id="productivityRate"></span></p>
-                <p><strong>Preparation Time:</strong> <span class="value" id="prepTime"></span></p>
-                <p><strong>Installation Time:</strong> <span class="value" id="installTime"></span></p>
-                <p><strong>Cleanup Time:</strong> <span class="value" id="cleanupTime"></span></p>
-                <p><strong>Total Project Duration:</strong> <span class="value" id="totalDays"></span></p>
-                <div class="cost-summary">
-                    <h3>Cost Summary</h3>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Item</th>
-                                <th class="cost-value">Cost</th>
-                                <th class="cost-value">Cost per m²</th>
-                            </tr>
-                        </thead>
-                        <tbody id="costTableBody">
-                            <tr>
-                                <td>Main Material Cost</td>
-                                <td class="cost-value"><span id="currencySymbolMaterial"></span><span id="materialCostResult"></span></td>
-                                <td class="cost-value"><span id="currencySymbolMaterialSqm"></span><span id="materialCostSqm"></span></td>
-                            </tr>
-                            <tr>
-                                <td>Accessory Cost</td>
-                                <td class="cost-value"><span id="currencySymbolAccessory"></span><span id="accessoryCostResult"></span></td>
-                                <td class="cost-value"><span id="currencySymbolAccessorySqm"></span><span id="accessoryCostSqm"></span></td>
-                            </tr>
-                            <tr id="plasteringCostRow">
-                                <td>Plastering Cost</td>
-                                <td class="cost-value"><span id="currencySymbolPlaster"></span><span id="plasteringCostResult"></span></td>
-                                <td class="cost-value"><span id="currencySymbolPlasterSqm"></span><span id="plasteringCostSqm"></span></td>
-                            </tr>
-                            <tr>
-                                <td>Labor Cost</td>
-                                <td class="cost-value"><span id="currencySymbolLabor"></span><span id="laborCostResult"></span></td>
-                                <td class="cost-value"><span id="currencySymbolLaborSqm"></span><span id="laborCostSqm"></span></td>
-                            </tr>
-                            <tr id="contingencyCostRow">
-                                <td>Contingency Cost</td>
-                                <td class="cost-value"><span id="currencySymbolContingency"></span><span id="contingencyCostResult"></span></td>
-                                <td class="cost-value"><span id="currencySymbolContingencySqm"></span><span id="contingencyCostSqm"></span></td>
-                            </tr>
-                            <tr>
-                                <td>Total Cost</td>
-                                <td class="cost-value"><span id="currencySymbolTotal"></span><span id="totalCost"></span></td>
-                                <td class="cost-value"><span id="currencySymbolTotalSqm"></span><span id="totalCostSqm"></span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="download-buttons">
-                    <button onclick="downloadPDF()">Download as PDF</button>
-                    <button class="secondary" onclick="printResults()">Print Results</button>
-                </div>
-            </div>
+    <h2>Calculation Results</h2>
+    <div id="message"></div>
+    
+    <!-- Add these lines to display wall parameters -->
+    <h3>Wall Parameters</h3>
+    <p><strong>Length:</strong> <span class="value" id="wallLengthResult"></span></p>
+    <p><strong>Height:</strong> <span class="value" id="wallHeightResult"></span></p>
+    <p><strong>Wall Area:</strong> <span class="value" id="wallArea"></span></p>
+    
+    <div id="materialResults"></div>
+    <h3>Accessory Materials</h3>
+    <div id="accessoryResults"></div>
+    <div id="plasteringResultsContainer">
+        <h3>Plastering Materials</h3>
+        <div id="plasteringResults"></div>
+    </div>
+    <h3>Labor Details</h3>
+    <p><strong>Number of Laborers:</strong> <span class="value" id="laborersResult"></span></p>
+    <p><strong>Productivity Rate:</strong> <span class="value" id="productivityRate"></span></p>
+    <p><strong>Preparation Time:</strong> <span class="value" id="prepTime"></span></p>
+    <p><strong>Installation Time:</strong> <span class="value" id="installTime"></span></p>
+    <p><strong>Cleanup Time:</strong> <span class="value" id="cleanupTime"></span></p>
+    <p><strong>Total Project Duration:</strong> <span class="value" id="totalDays"></span></p>
+    <div class="cost-summary">
+        <h3>Cost Summary</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th class="cost-value">Cost</th>
+                    <th class="cost-value">Cost per m²</th>
+                </tr>
+            </thead>
+            <tbody id="costTableBody">
+                <tr>
+                    <td>Main Material Cost</td>
+                    <td class="cost-value"><span id="currencySymbolMaterial"></span><span id="materialCostResult"></span></td>
+                    <td class="cost-value"><span id="currencySymbolMaterialSqm"></span><span id="materialCostSqm"></span></td>
+                </tr>
+                <tr>
+                    <td>Accessory Cost</td>
+                    <td class="cost-value"><span id="currencySymbolAccessory"></span><span id="accessoryCostResult"></span></td>
+                    <td class="cost-value"><span id="currencySymbolAccessorySqm"></span><span id="accessoryCostSqm"></span></td>
+                </tr>
+                <tr id="plasteringCostRow">
+                    <td>Plastering Cost</td>
+                    <td class="cost-value"><span id="currencySymbolPlaster"></span><span id="plasteringCostResult"></span></td>
+                    <td class="cost-value"><span id="currencySymbolPlasterSqm"></span><span id="plasteringCostSqm"></span></td>
+                </tr>
+                <tr>
+                    <td>Labor Cost</td>
+                    <td class="cost-value"><span id="currencySymbolLabor"></span><span id="laborCostResult"></span></td>
+                    <td class="cost-value"><span id="currencySymbolLaborSqm"></span><span id="laborCostSqm"></span></td>
+                </tr>
+                <tr id="contingencyCostRow">
+                    <td>Contingency Cost</td>
+                    <td class="cost-value"><span id="currencySymbolContingency"></span><span id="contingencyCostResult"></span></td>
+                    <td class="cost-value"><span id="currencySymbolContingencySqm"></span><span id="contingencyCostSqm"></span></td>
+                </tr>
+                <tr>
+                    <td>Total Cost</td>
+                    <td class="cost-value"><span id="currencySymbolTotal"></span><span id="totalCost"></span></td>
+                    <td class="cost-value"><span id="currencySymbolTotalSqm"></span><span id="totalCostSqm"></span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="download-buttons">
+        <button onclick="downloadPDF()">Download as PDF</button>
+        <button class="secondary" onclick="printResults()">Print Results</button>
+    </div>
+</div>
         </div>
         <div class="guidelines">
             <h2>Guidelines & Formulas</h2>
@@ -1168,85 +1174,91 @@
 }
 
         function displayResults() {
-            console.log('Displaying results');
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.style.display = 'block';
-            document.getElementById('message').className = 'success';
-            document.getElementById('message').textContent = 'Calculation successful!';
+    console.log('Displaying results');
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.style.display = 'block';
+    document.getElementById('message').className = 'success';
+    document.getElementById('message').textContent = 'Calculation successful!';
 
-            document.getElementById('wallArea').textContent = `${resultsData.wallArea.toFixed(2)} m²`;
-            document.getElementById('laborersResult').textContent = resultsData.laborers;
-            document.getElementById('productivityRate').textContent = `${resultsData.productivityRate} m²/day`;
-            document.getElementById('prepTime').textContent = `${resultsData.prepTime} days`;
-            document.getElementById('installTime').textContent = `${resultsData.installTime} days`;
-            document.getElementById('cleanupTime').textContent = `${resultsData.cleanupTime} days`;
-            document.getElementById('totalDays').textContent = `${resultsData.totalDays} days`;
+    // Update wall parameters
+    document.getElementById('wallLengthResult').textContent = `${resultsData.wallLength.toFixed(2)} m`;
+    document.getElementById('wallHeightResult').textContent = `${resultsData.wallHeight.toFixed(2)} m`;
+    document.getElementById('wallArea').textContent = `${resultsData.wallArea.toFixed(2)} m²`;
 
-            const currencySymbol = resultsData.currencySymbol;
-            const wallArea = resultsData.wallArea;
+    // Update labor details
+    document.getElementById('laborersResult').textContent = resultsData.laborers;
+    document.getElementById('productivityRate').textContent = `${resultsData.productivityRate} m²/day`;
+    document.getElementById('prepTime').textContent = `${resultsData.prepTime} days`;
+    document.getElementById('installTime').textContent = `${resultsData.installTime} days`;
+    document.getElementById('cleanupTime').textContent = `${resultsData.cleanupTime} days`;
+    document.getElementById('totalDays').textContent = `${resultsData.totalDays} days`;
 
-            document.getElementById('currencySymbolMaterial').textContent = currencySymbol;
-            document.getElementById('materialCostResult').textContent = resultsData.materialCost.toFixed(2);
-            document.getElementById('currencySymbolMaterialSqm').textContent = currencySymbol;
-            document.getElementById('materialCostSqm').textContent = wallArea > 0 ? (resultsData.materialCost / wallArea).toFixed(2) : '0.00';
+    // Update cost summary
+    const currencySymbol = resultsData.currencySymbol;
+    const wallArea = resultsData.wallArea;
 
-            document.getElementById('currencySymbolAccessory').textContent = currencySymbol;
-            document.getElementById('accessoryCostResult').textContent = resultsData.accessoryCost.toFixed(2);
-            document.getElementById('currencySymbolAccessorySqm').textContent = currencySymbol;
-            document.getElementById('accessoryCostSqm').textContent = wallArea > 0 ? (resultsData.accessoryCost / wallArea).toFixed(2) : '0.00';
+    document.getElementById('currencySymbolMaterial').textContent = currencySymbol;
+    document.getElementById('materialCostResult').textContent = resultsData.materialCost.toFixed(2);
+    document.getElementById('currencySymbolMaterialSqm').textContent = currencySymbol;
+    document.getElementById('materialCostSqm').textContent = wallArea > 0 ? (resultsData.materialCost / wallArea).toFixed(2) : '0.00';
 
-            document.getElementById('currencySymbolPlaster').textContent = currencySymbol;
-            document.getElementById('plasteringCostResult').textContent = resultsData.plasteringCost.toFixed(2);
-            document.getElementById('currencySymbolPlasterSqm').textContent = currencySymbol;
-            document.getElementById('plasteringCostSqm').textContent = wallArea > 0 ? (resultsData.plasteringCost / wallArea).toFixed(2) : '0.00';
+    document.getElementById('currencySymbolAccessory').textContent = currencySymbol;
+    document.getElementById('accessoryCostResult').textContent = resultsData.accessoryCost.toFixed(2);
+    document.getElementById('currencySymbolAccessorySqm').textContent = currencySymbol;
+    document.getElementById('accessoryCostSqm').textContent = wallArea > 0 ? (resultsData.accessoryCost / wallArea).toFixed(2) : '0.00';
 
-            document.getElementById('currencySymbolLabor').textContent = currencySymbol;
-            document.getElementById('laborCostResult').textContent = resultsData.laborCost.toFixed(2);
-            document.getElementById('currencySymbolLaborSqm').textContent = currencySymbol;
-            document.getElementById('laborCostSqm').textContent = wallArea > 0 ? (resultsData.laborCost / wallArea).toFixed(2) : '0.00';
+    document.getElementById('currencySymbolPlaster').textContent = currencySymbol;
+    document.getElementById('plasteringCostResult').textContent = resultsData.plasteringCost.toFixed(2);
+    document.getElementById('currencySymbolPlasterSqm').textContent = currencySymbol;
+    document.getElementById('plasteringCostSqm').textContent = wallArea > 0 ? (resultsData.plasteringCost / wallArea).toFixed(2) : '0.00';
 
-            document.getElementById('currencySymbolContingency').textContent = currencySymbol;
-            document.getElementById('contingencyCostResult').textContent = resultsData.contingency.toFixed(2);
-            document.getElementById('currencySymbolContingencySqm').textContent = currencySymbol;
-            document.getElementById('contingencyCostSqm').textContent = wallArea > 0 ? (resultsData.contingency / wallArea).toFixed(2) : '0.00';
+    document.getElementById('currencySymbolLabor').textContent = currencySymbol;
+    document.getElementById('laborCostResult').textContent = resultsData.laborCost.toFixed(2);
+    document.getElementById('currencySymbolLaborSqm').textContent = currencySymbol;
+    document.getElementById('laborCostSqm').textContent = wallArea > 0 ? (resultsData.laborCost / wallArea).toFixed(2) : '0.00';
 
-            document.getElementById('currencySymbolTotal').textContent = currencySymbol;
-            document.getElementById('totalCost').textContent = resultsData.totalCost.toFixed(2);
-            document.getElementById('currencySymbolTotalSqm').textContent = currencySymbol;
-            document.getElementById('totalCostSqm').textContent = wallArea > 0 ? (resultsData.totalCost / wallArea).toFixed(2) : '0.00';
+    document.getElementById('currencySymbolContingency').textContent = currencySymbol;
+    document.getElementById('contingencyCostResult').textContent = resultsData.contingency.toFixed(2);
+    document.getElementById('currencySymbolContingencySqm').textContent = currencySymbol;
+    document.getElementById('contingencyCostSqm').textContent = wallArea > 0 ? (resultsData.contingency / wallArea).toFixed(2) : '0.00';
 
-            const materialResultsDiv = document.getElementById('materialResults');
-            materialResultsDiv.innerHTML = '';
-            for (const [name, data] of Object.entries(resultsData.materials)) {
-                materialResultsDiv.innerHTML += `
-                    <p><strong>${name} Quantity:</strong> <span class="value">${data.quantity} ${data.unit}</span></p>
-                    <p><strong>${name} Cost:</strong> <span class="value">${currencySymbol}${data.cost.toFixed(2)}</span></p>
-                `;
-            }
+    document.getElementById('currencySymbolTotal').textContent = currencySymbol;
+    document.getElementById('totalCost').textContent = resultsData.totalCost.toFixed(2);
+    document.getElementById('currencySymbolTotalSqm').textContent = currencySymbol;
+    document.getElementById('totalCostSqm').textContent = wallArea > 0 ? (resultsData.totalCost / wallArea).toFixed(2) : '0.00';
 
-            const accessoryResultsDiv = document.getElementById('accessoryResults');
-            accessoryResultsDiv.innerHTML = '';
-            for (const [name, data] of Object.entries(resultsData.accessories)) {
-                accessoryResultsDiv.innerHTML += `
-                    <p><strong>${name} Quantity:</strong> <span class="value">${data.quantity} ${data.unit}</span></p>
-                    <p><strong>${name} Cost:</strong> <span class="value">${currencySymbol}${data.cost.toFixed(2)}</span></p>
-                `;
-            }
+    const materialResultsDiv = document.getElementById('materialResults');
+    materialResultsDiv.innerHTML = '';
+    for (const [name, data] of Object.entries(resultsData.materials)) {
+        materialResultsDiv.innerHTML += `
+            <p><strong>${name} Quantity:</strong> <span class="value">${data.quantity} ${data.unit}</span></p>
+            <p><strong>${name} Cost:</strong> <span class="value">${currencySymbol}${data.cost.toFixed(2)}</span></p>
+        `;
+    }
 
-            const plasteringResultsDiv = document.getElementById('plasteringResults');
-            plasteringResultsDiv.innerHTML = '';
-            if (Object.keys(resultsData.plastering).length > 0) {
-                document.getElementById('plasteringResultsContainer').style.display = 'block';
-                for (const [name, data] of Object.entries(resultsData.plastering)) {
-                    plasteringResultsDiv.innerHTML += `
-                        <p><strong>${name} Quantity:</strong> <span class="value">${data.quantity} ${data.unit}</span></p>
-                        <p><strong>${name} Cost:</strong> <span class="value">${currencySymbol}${data.cost.toFixed(2)}</span></p>
-                    `;
-                }
-            } else {
-                document.getElementById('plasteringResultsContainer').style.display = 'none';
-            }
+    const accessoryResultsDiv = document.getElementById('accessoryResults');
+    accessoryResultsDiv.innerHTML = '';
+    for (const [name, data] of Object.entries(resultsData.accessories)) {
+        accessoryResultsDiv.innerHTML += `
+            <p><strong>${name} Quantity:</strong> <span class="value">${data.quantity} ${data.unit}</span></p>
+            <p><strong>${name} Cost:</strong> <span class="value">${currencySymbol}${data.cost.toFixed(2)}</span></p>
+        `;
+    }
+
+    const plasteringResultsDiv = document.getElementById('plasteringResults');
+    plasteringResultsDiv.innerHTML = '';
+    if (Object.keys(resultsData.plastering).length > 0) {
+        document.getElementById('plasteringResultsContainer').style.display = 'block';
+        for (const [name, data] of Object.entries(resultsData.plastering)) {
+            plasteringResultsDiv.innerHTML += `
+                <p><strong>${name} Quantity:</strong> <span class="value">${data.quantity} ${data.unit}</span></p>
+                <p><strong>${name} Cost:</strong> <span class="value">${currencySymbol}${data.cost.toFixed(2)}</span></p>
+            `;
         }
+    } else {
+        document.getElementById('plasteringResultsContainer').style.display = 'none';
+    }
+}
 
         function downloadPDF() {
     if (!window.resultsData) {
