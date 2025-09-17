@@ -774,6 +774,7 @@
         };
 
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing calculator');
             document.querySelectorAll('.tab').forEach(tab => {
                 tab.addEventListener('click', () => {
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -783,7 +784,12 @@
                 });
             });
 
-            document.getElementById('calculatorForm').addEventListener('submit', calculateResults);
+            const form = document.getElementById('calculatorForm');
+            if (!form) {
+                console.error('Calculator form not found');
+                return;
+            }
+            form.addEventListener('submit', calculateResults);
 
             addMaterial();
             addMaterial();
@@ -886,8 +892,7 @@
                     framedWallOptions.style.display = 'block';
                     document.getElementById(`pliesSide1${materialCount}`).setAttribute('required', 'required');
                     document.getElementById(`pliesSide2${materialCount}`).setAttribute('required', 'required');
-                    document.getElementById(`side1${materialCount}`).checked = false;
-                    document.getElementById(`side2${materialCount}`).checked = false;
+                    document.getElementById(`side1${materialCount}`).checked = true; // Default Side 1 checked
                     document.getElementById(`side2${materialCount}`).disabled = false;
                 } else {
                     framedWallOptions.style.display = 'none';
@@ -937,31 +942,44 @@
 
         function calculateResults(event) {
             event.preventDefault();
+            console.log('Calculate button clicked');
             const form = document.getElementById('calculatorForm');
-            const wallLength = parseFloat(form.elements.length.value);
-            const wallHeight = parseFloat(form.elements.height.value);
-            const plasterSide1 = form.elements.plasterSide1.checked;
-            const plasterSide2 = form.elements.plasterSide2.checked;
-            const plasterThickness = parseFloat(form.elements.plasterThickness.value) || 10;
-            const currency = form.elements.currency.value;
-            const studCost = parseFloat(form.elements.studCost.value) || 0;
-            const trackCost = parseFloat(form.elements.trackCost.value) || 0;
-            const screwCost = parseFloat(form.elements.screwCost.value) || 0;
-            const jointCompoundCost = parseFloat(form.elements.jointCompoundCost.value) || 0;
-            const sealantCost = parseFloat(form.elements.sealantCost.value) || 0;
-            const rebarCost = parseFloat(form.elements.rebarCost.value) || 0;
-            const connectorCost = parseFloat(form.elements.connectorCost.value) || 0;
-            const mortarCementCost = parseFloat(form.elements.mortarCementCost.value) || 0;
-            const mortarSandCost = parseFloat(form.elements.mortarSandCost.value) || 0;
-            const mortarWaterCost = parseFloat(form.elements.mortarWaterCost.value) || 0;
-            const plasterCementCost = parseFloat(form.elements.plasterCementCost.value) || 0;
-            const plasterSandCost = parseFloat(form.elements.plasterSandCost.value) || 0;
-            const plasterWaterCost = parseFloat(form.elements.plasterWaterCost.value) || 0;
-            const laborCostPerSqM = parseFloat(form.elements.laborCost.value) || 0;
-            const numberOfLaborers = parseInt(form.elements.laborers.value) || 1;
-            const contingencyPercent = parseFloat(form.elements.contingency.value) / 100 || 0;
+            if (!form) {
+                console.error('Form element not found');
+                displayError('Internal error: Form not found');
+                return;
+            }
+
+            const lengthInput = document.getElementById('length');
+            const heightInput = document.getElementById('height');
+            console.log('Length input:', lengthInput.value);
+            console.log('Height input:', heightInput.value);
+
+            const wallLength = parseFloat(lengthInput.value) || 0;
+            const wallHeight = parseFloat(heightInput.value) || 0;
+            const plasterSide1 = document.getElementById('plasterSide1').checked;
+            const plasterSide2 = document.getElementById('plasterSide2').checked;
+            const plasterThickness = parseFloat(document.getElementById('plasterThickness').value) || 10;
+            const currency = document.getElementById('currency').value;
+            const studCost = parseFloat(document.getElementById('studCost').value) || 0;
+            const trackCost = parseFloat(document.getElementById('trackCost').value) || 0;
+            const screwCost = parseFloat(document.getElementById('screwCost').value) || 0;
+            const jointCompoundCost = parseFloat(document.getElementById('jointCompoundCost').value) || 0;
+            const sealantCost = parseFloat(document.getElementById('sealantCost').value) || 0;
+            const rebarCost = parseFloat(document.getElementById('rebarCost').value) || 0;
+            const connectorCost = parseFloat(document.getElementById('connectorCost').value) || 0;
+            const mortarCementCost = parseFloat(document.getElementById('mortarCementCost').value) || 0;
+            const mortarSandCost = parseFloat(document.getElementById('mortarSandCost').value) || 0;
+            const mortarWaterCost = parseFloat(document.getElementById('mortarWaterCost').value) || 0;
+            const plasterCementCost = parseFloat(document.getElementById('plasterCementCost').value) || 0;
+            const plasterSandCost = parseFloat(document.getElementById('plasterSandCost').value) || 0;
+            const plasterWaterCost = parseFloat(document.getElementById('plasterWaterCost').value) || 0;
+            const laborCostPerSqM = parseFloat(document.getElementById('laborCost').value) || 0;
+            const numberOfLaborers = parseInt(document.getElementById('laborers').value) || 1;
+            const contingencyPercent = parseFloat(document.getElementById('contingency').value) / 100 || 0;
 
             if (isNaN(wallLength) || isNaN(wallHeight) || wallLength <= 0 || wallHeight <= 0) {
+                console.error('Invalid dimensions: Length=', wallLength, 'Height=', wallHeight);
                 displayError('Please enter valid wall dimensions (greater than 0).');
                 return;
             }
@@ -978,10 +996,12 @@
             const materialCards = document.querySelectorAll('.material-card');
 
             if (materialCards.length === 0) {
+                console.error('No material layers added');
                 displayError('Please add at least one material layer.');
                 return;
             }
 
+            let validMaterials = true;
             materialCards.forEach(card => {
                 const id = card.id.split('-')[2];
                 const materialType = document.getElementById(`materialType${id}`).value;
@@ -992,13 +1012,19 @@
                 const pliesSide1 = config.isFramedWall && side1 ? parseInt(document.getElementById(`pliesSide1${id}`).value) || 1 : 1;
                 const pliesSide2 = config.isFramedWall && side2 ? parseInt(document.getElementById(`pliesSide2${id}`).value) || 1 : 1;
 
+                console.log(`Material ${id}: Type=${materialType}, Cost=${materialCost}, Side1=${side1}, Side2=${side2}, Plies1=${pliesSide1}, Plies2=${pliesSide2}`);
+
                 if (isNaN(materialCost) || materialCost < 0) {
+                    console.error(`Invalid material cost for ${config.name}: ${materialCost}`);
                     displayError(`Invalid material cost for ${config.name}. Please enter a valid number.`);
+                    validMaterials = false;
                     return;
                 }
 
                 if (config.isFramedWall && !side1 && !side2) {
+                    console.error(`No side selected for ${config.name}`);
                     displayError(`Please select at least one side for ${config.name}.`);
+                    validMaterials = false;
                     return;
                 }
 
@@ -1006,7 +1032,9 @@
                 const wasteFactor = wasteFactors[materialType];
 
                 if (!unitArea) {
+                    console.error(`Missing unit area for material: ${config.name}`);
                     displayError(`Missing unit area for material: ${config.name}`);
+                    validMaterials = false;
                     return;
                 }
 
@@ -1043,6 +1071,8 @@
                     totalAccessoryCost += sealant * sealantCost;
                 }
             });
+
+            if (!validMaterials) return;
 
             const totalFramedWallPlies = totalPlies;
             if (totalFramedWallPlies > 0) {
@@ -1101,12 +1131,12 @@
             const totalDays = installationDays + productivityConfig.prep + productivityConfig.cleanup;
 
             resultsData = {
-                projectName: form.elements.projectName.value,
-                projectLocation: form.elements.projectLocation.value,
-                clientName: form.elements.clientName.value,
-                companyName: form.elements.companyName.value,
-                date: form.elements.date.value,
-                preparedBy: form.elements.preparedBy.value,
+                projectName: document.getElementById('projectName').value,
+                projectLocation: document.getElementById('projectLocation').value,
+                clientName: document.getElementById('clientName').value,
+                companyName: document.getElementById('companyName').value,
+                date: document.getElementById('date').value,
+                preparedBy: document.getElementById('preparedBy').value,
                 wallLength: wallLength,
                 wallHeight: wallHeight,
                 wallArea: wallArea,
@@ -1132,10 +1162,12 @@
                 plasteringCost: totalPlasteringCost
             };
 
+            console.log('Results calculated:', resultsData);
             displayResults();
         }
 
         function displayResults() {
+            console.log('Displaying results');
             const resultsDiv = document.getElementById('results');
             resultsDiv.style.display = 'block';
             document.getElementById('message').className = 'success';
