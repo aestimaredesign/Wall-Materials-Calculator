@@ -1258,6 +1258,9 @@
 
     const currencySymbol = resultsData.currencySymbol;
 
+    // Debug: Log resultsData to check if wall parameters are present
+    console.log('ResultsData before PDF:', resultsData);
+
     // Set the title
     doc.setFontSize(22);
     doc.text("Wall Materials Calculation", 105, 20, null, null, "center");
@@ -1271,14 +1274,19 @@
     doc.text(`Date: ${resultsData.date || 'N/A'}`, 120, 35);
     doc.text(`Prepared By: ${resultsData.preparedBy || 'N/A'}`, 120, 42);
 
-    // Wall Parameters table with fallback values
+    // Wall Parameters table with forced values and debug
+    const wallLength = resultsData.wallLength !== undefined ? resultsData.wallLength.toFixed(2) : 'N/A';
+    const wallHeight = resultsData.wallHeight !== undefined ? resultsData.wallHeight.toFixed(2) : 'N/A';
+    const wallArea = resultsData.wallArea !== undefined ? resultsData.wallArea.toFixed(2) : 'N/A';
+    console.log('Wall Params for PDF:', { wallLength, wallHeight, wallArea });
+
     doc.autoTable({
         startY: 60,
         head: [['Wall Parameters']],
         body: [
-            ['Length', `${resultsData.wallLength !== undefined ? resultsData.wallLength.toFixed(2) : 'N/A'} m`],
-            ['Height', `${resultsData.wallHeight !== undefined ? resultsData.wallHeight.toFixed(2) : 'N/A'} m`],
-            ['Area', `${resultsData.wallArea !== undefined ? resultsData.wallArea.toFixed(2) : 'N/A'} m²`]
+            ['Length', `${wallLength} m`],
+            ['Height', `${wallHeight} m`],
+            ['Area', `${wallArea} m²`]
         ],
         theme: 'striped',
         headStyles: { fillColor: [44, 62, 80] },
