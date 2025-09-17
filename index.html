@@ -7,6 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
+        /* Your CSS remains the same */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -606,174 +607,375 @@
     </div>
     <script>
         let resultsData = null;
-        let materialCount = 0;
-        const materialConfig = {
-            'gypsum': { name: 'Gypsum Board', types: ['Ordinary', 'Moisture-Resistant', 'Fire-Resistant', 'Acoustic', 'Impact-Resistant'], thicknesses: ['9', '12', '15', '16'], dimensions: ['1200 x 2400 mm', '1200 x 3000 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 12, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-            'fiber-cement': { name: 'Fiber Cement Board', types: ['Ordinary', 'Moisture-Resistant', 'Exterior Grade'], thicknesses: ['4.5', '6', '9', '12', '16'], dimensions: ['1200 x 2400 mm', '1200 x 3000 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 10, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-            'cement-board': { name: 'Cement Board', types: ['Standard Tile Backer', 'Moisture/Mold-Resistant', 'Heavy-Duty'], thicknesses: ['6', '9', '12', '16'], dimensions: ['1200 x 2400 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 9, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-            'calcium-silicate': { name: 'Calcium Silicate Board', types: ['Standard', 'Moisture-Resistant', 'Fire-Resistant', 'Acoustic'], thicknesses: ['6', '9', '12', '15'], dimensions: ['1200 x 2400 mm', '600 x 1200 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 11, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-            'mgo': { name: 'Magnesium Oxide Board', types: ['Standard', 'Moisture/Mold-Resistant', 'Fire-Resistant'], thicknesses: ['6', '9', '12', '15'], dimensions: ['1200 x 2400 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 10, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-            'plywood': { name: 'Plywood', types: ['Interior Grade', 'Marine Plywood', 'Phenolic Film-Faced', 'Acoustic'], thicknesses: ['3', '6', '9', '12', '15', '18', '25'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 15, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-            'mdf': { name: 'MDF', types: ['Standard MDF', 'Moisture-Resistant MDF', 'Fire-Retardant MDF'], thicknesses: ['3', '6', '9', '12', '15', '18', '25'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 14, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-            'particle-board': { name: 'Particle Board', types: ['Standard', 'Laminated', 'Moisture-Resistant'], thicknesses: ['9', '12', '15', '18'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 13, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-            'osb': { name: 'OSB', types: ['Standard', 'Exterior Grade', 'Fire-Resistant'], thicknesses: ['9', '12', '15', '18'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 12, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-            'chb': { name: 'Concrete Hollow Block', types: ['4-inch', '6-inch'], thicknesses: ['100', '150'], unit: 'pieces', unitArea: 0.12, needsPlastering: true, productivityRate: 8, accessories: { studs: false, tracks: false, screws: false, jointCompound: false, sealants: false, mortar: true, rebars: true, connectors: true }, supportsPlies: false, isBoard: false, isFramedWall: false },
-            'sips': { name: 'Structural Insulated Panels (SIPs)', types: ['Standard', 'High Insulation', 'Fire-Resistant'], thicknesses: ['100', '150', '200'], dimensions: ['1200 x 2400 mm', '1200 x 3000 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 15, accessories: { studs: false, tracks: false, screws: true, jointCompound: true, sealants: true, mortar: false, rebars: false, connectors: true }, supportsPlies: false, isBoard: true, isFramedWall: false },
-            'aac': { name: 'Autoclaved Aerated Concrete (AAC)', types: ['Standard Block', 'Reinforced Block'], thicknesses: ['100', '150', '200'], unit: 'blocks', unitArea: 0.12, needsPlastering: true, productivityRate: 7, accessories: { studs: false, tracks: false, screws: false, jointCompound: false, sealants: false, mortar: true, rebars: true, connectors: true }, supportsPlies: false, isBoard: false, isFramedWall: false },
-            'precast': { name: 'Precast Concrete Wall', types: ['Standard Panel', 'Insulated Panel', 'Decorative'], thicknesses: ['100', '150', '200'], dimensions: ['1200 x 3000 mm'], unit: 'panels', unitArea: 3.6, needsPlastering: false, productivityRate: 20, accessories: { studs: false, tracks: false, screws: false, jointCompound: false, sealants: true, mortar: false, rebars: false, connectors: true }, supportsPlies: false, isBoard: true, isFramedWall: false }
-        };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM loaded, initializing calculator');
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    tab.classList.add('active');
-                    document.getElementById(`${tab.dataset.tab}-tab`).classList.add('active');
-                });
+    let materialCount = 0;
+    const materialConfig = {
+        'gypsum': { name: 'Gypsum Board', types: ['Ordinary', 'Moisture-Resistant', 'Fire-Resistant', 'Acoustic', 'Impact-Resistant'], thicknesses: ['9', '12', '15', '16'], dimensions: ['1200 x 2400 mm', '1200 x 3000 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 12, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+        'fiber-cement': { name: 'Fiber Cement Board', types: ['Ordinary', 'Moisture-Resistant', 'Exterior Grade'], thicknesses: ['4.5', '6', '9', '12', '16'], dimensions: ['1200 x 2400 mm', '1200 x 3000 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 10, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+        'cement-board': { name: 'Cement Board', types: ['Standard Tile Backer', 'Moisture/Mold Resistant', 'Heavy-Duty'], thicknesses: ['6', '9', '12', '16'], dimensions: ['1200 x 2400 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 9, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+        'calcium-silicate': { name: 'Calcium Silicate Board', types: ['Standard', 'Moisture-Resistant', 'Fire-Resistant', 'Acoustic'], thicknesses: ['6', '9', '12', '15'], dimensions: ['1200 x 2400 mm', '600 x 1200 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 11, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+        'mgo': { name: 'Magnesium Oxide Board', types: ['Standard', 'Moisture/Mold-Resistant', 'Fire Resistant'], thicknesses: ['6', '9', '12', '15'], dimensions: ['1200 x 2400 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 10, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+        'plywood': { name: 'Plywood', types: ['Interior Grade', 'Marine Plywood', 'Phenolic Film-Faced', 'Acoustic'], thicknesses: ['3', '6', '9', '12', '15', '18', '25'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 15, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+        'mdf': { name: 'MDF', types: ['Standard MDF', 'Moisture-Resistant MDF', 'Fire-Retardant MDF'], thicknesses: ['3', '6', '9', '12', '15', '18', '25'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 14, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+        'particle-board': { name: 'Particle Board', types: ['Standard', 'Laminated', 'Moisture-Resistant'], thicknesses: ['9', '12', '15', '18'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 13, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+        'osb': { name: 'OSB', types: ['Standard', 'Exterior Grade', 'Fire-Resistant'], thicknesses: ['9', '12', '15', '18'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 12, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+        'chb': { name: 'Concrete Hollow Block', types: ['4-inch', '6-inch'], thicknesses: ['100', '150'], unit: 'pieces', unitArea: 0.12, needsPlastering: true, productivityRate: 8, accessories: { studs: false, tracks: false, screws: false, jointCompound: false, sealants: false, mortar: true, rebars: true, connectors: true }, supportsPlies: false, isBoard: false, isFramedWall: false },
+        'sips': { name: 'Structural Insulated Panels (SIPs)', types: ['Standard', 'High Insulation', 'Fire Resistant'], thicknesses: ['100', '150', '200'], dimensions: ['1200 x 2400 mm', '1200 x 3000 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 15, accessories: { studs: false, tracks: false, screws: true, jointCompound: true, sealants: true, mortar: false, rebars: false, connectors: true }, supportsPlies: false, isBoard: true, isFramedWall: false },
+        'aac': { name: 'Autoclaved Aerated Concrete (AAC)', types: ['Standard Block', 'Reinforced Block'], thicknesses: ['100', '150', '200'], unit: 'blocks', unitArea: 0.12, needsPlastering: true, productivityRate: 7, accessories: { studs: false, tracks: false, screws: false, jointCompound: false, sealants: false, mortar: true, rebars: true, connectors: true }, supportsPlies: false, isBoard: false, isFramedWall: false },
+        'precast': { name: 'Precast Concrete Wall', types: ['Standard Panel', 'Insulated Panel', 'Decorative'], thicknesses: ['100', '150', '200'], dimensions: ['1200 x 3000 mm'], unit: 'panels', unitArea: 3.6, needsPlastering: false, productivityRate: 20, accessories: { studs: false, tracks: false, screws: false, jointCompound: false, sealants: true, mortar: false, rebars: false, connectors: true }, supportsPlies: false, isBoard: true, isFramedWall: false }
+    };
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM loaded, initializing calculator');
+        // Initialize tabs
+        initTabs();
+        const form = document.getElementById('calculatorForm');
+        if (!form) {
+            console.error('Form element not found');
+            displayError('Internal error: Form not found');
+            return;
+        }
+        form.addEventListener('submit', calculateResults);
+        // Add one material layer on page load
+        addMaterial();
+    });
+    function initTabs() {
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(`${tabId}-tab`).classList.add('active');
             });
-
-            const form = document.getElementById('calculatorForm');
-            if (!form) {
-                console.error('Calculator form not found');
-                return;
-            }
-            form.addEventListener('submit', calculateResults);
-
-            addMaterial();
-            addMaterial();
         });
-
-        function addMaterial() {
-            materialCount++;
-            const materialsContainer = document.getElementById('materials-container');
-            const materialCard = document.createElement('div');
-            materialCard.className = 'material-card';
-            materialCard.id = `material-card-${materialCount}`;
-
-            const materialSelectOptions = Object.keys(materialConfig).map(key => `<option value="${key}">${materialConfig[key].name}</option>`).join('');
-
-            materialCard.innerHTML = `
-                <div class="material-header">
-                    <h3>Material Layer ${materialCount}</h3>
-                    <button type="button" class="remove-material" onclick="removeMaterial(${materialCount})">Remove</button>
-                </div>
-                <label>
-                    Material Type:
-                    <select id="materialType${materialCount}" class="material-type-select" title="Select the type of material">
-                        ${materialSelectOptions}
-                    </select>
-                </label>
-                <label>
-                    Board Type:
-                    <select id="boardType${materialCount}" title="Select the specific board type"></select>
-                </label>
-                <label>
-                    Thickness (mm):
-                    <select id="thickness${materialCount}" title="Select the material thickness"></select>
-                </label>
-                <label>
-                    Dimensions:
-                    <select id="dimensions${materialCount}" title="Select the material dimensions"></select>
-                </label>
-                <label>
-                    Material Cost (per unit):
-                    <input type="number" id="materialCost${materialCount}" step="0.01" min="0" value="300" title="Cost of one unit of this material" required>
-                </label>
-                <label>
-                    Waste Factor (%):
-                    <input type="number" id="wasteFactor${materialCount}" step="0.01" min="0" max="20" value="${(materialConfig[Object.keys(materialConfig)[0]].needsPlastering ? 10 : 5).toFixed(2)}" title="Waste percentage for this material" required>
-                </label>
-                <div class="framed-wall-options">
-                    <div class="side-selection" id="sideSelection${materialCount}">
-                        <div class="side-box">
-                            <label>
-                                Side 1:
-                                <input type="checkbox" id="side1${materialCount}" title="Apply this material to the first side">
-                            </label>
-                            <label class="plies-label">
-                                Plies for Side 1:
-                                <input type="number" id="pliesSide1${materialCount}" min="1" step="1" value="1" title="Number of layers for Side 1" required>
-                            </label>
-                        </div>
-                        <div class="side-box">
-                            <label>
-                                Side 2:
-                                <input type="checkbox" id="side2${materialCount}" title="Apply this material to the second side">
-                            </label>
-                            <label class="plies-label">
-                                Plies for Side 2:
-                                <input type="number" id="pliesSide2${materialCount}" min="1" step="1" value="1" title="Number of layers for Side 2" required>
-                            </label>
-                        </div>
+    }
+    // Added this function to handle dynamic updates on the materials tab
+    function updateMaterialOptions(materialSelect) {
+        const materialCard = materialSelect.closest('.material-card');
+        const materialId = materialSelect.id.replace('materialType', '');
+        const selectedMaterial = materialConfig[materialSelect.value];
+        const boardTypeSelect = materialCard.querySelector(`#boardType${materialId}`);
+        const thicknessSelect = materialCard.querySelector(`#thickness${materialId}`);
+        const dimensionsSelect = materialCard.querySelector(`#dimensions${materialId}`);
+        const wasteFactorInput = materialCard.querySelector(`#wasteFactor${materialId}`);
+        const framedWallOptions = materialCard.querySelector('.framed-wall-options');
+        // Clear previous options
+        boardTypeSelect.innerHTML = '';
+        thicknessSelect.innerHTML = '';
+        dimensionsSelect.innerHTML = '';
+        // Hide framed wall options for non-framed walls
+        if (selectedMaterial.isFramedWall) {
+            framedWallOptions.style.display = 'block';
+        } else {
+            framedWallOptions.style.display = 'none';
+        }
+        // Populate new options based on material config
+        if (selectedMaterial.types) {
+            selectedMaterial.types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                boardTypeSelect.appendChild(option);
+            });
+        }
+        if (selectedMaterial.thicknesses) {
+            selectedMaterial.thicknesses.forEach(thickness => {
+                const option = document.createElement('option');
+                option.value = thickness;
+                option.textContent = thickness;
+                thicknessSelect.appendChild(option);
+            });
+        }
+        if (selectedMaterial.dimensions) {
+            selectedMaterial.dimensions.forEach(dim => {
+                const option = document.createElement('option');
+                option.value = dim;
+                option.textContent = dim;
+                dimensionsSelect.appendChild(option);
+            });
+        }
+        // Set waste factor
+        wasteFactorInput.value = (selectedMaterial.needsPlastering ? 10 : 5).toFixed(2);
+    }
+    function addMaterial() {
+        materialCount++;
+        const materialsContainer = document.getElementById('materials-container');
+        const materialCard = document.createElement('div');
+        materialCard.className = 'material-card';
+        materialCard.id = `material-card-${materialCount}`;
+        const materialSelectOptions = Object.keys(materialConfig).map(key => `<option value="${key}">${materialConfig[key].name}</option>`).join('');
+        materialCard.innerHTML = `
+            <div class="material-header">
+                <h3>Material Layer ${materialCount}</h3>
+                <button type="button" class="remove-material" onclick="removeMaterial(${materialCount})">Remove</button>
+            </div>
+            <label>
+                Material Type:
+                <select id="materialType${materialCount}" class="material-type-select" title="Select the type of material">
+                    ${materialSelectOptions}
+                </select>
+            </label>
+            <label>
+                Board Type:
+                <select id="boardType${materialCount}" title="Select the specific board type"></select>
+            </label>
+            <label>
+                Thickness (mm):
+                <select id="thickness${materialCount}" title="Select the material thickness"></select>
+            </label>
+            <label>
+                Dimensions:
+                <select id="dimensions${materialCount}" title="Select the material dimensions"></select>
+            </label>
+            <label>
+                Material Cost (per unit):
+                <input type="number" id="materialCost${materialCount}" step="0.01" min="0" value="300" title="Cost of one unit of this material" required>
+            </label>
+            <label>
+                Waste Factor (%):
+                <input type="number" id="wasteFactor${materialCount}" step="0.01" min="0" max="20" value="${(materialConfig[Object.keys(materialConfig)[0]].needsPlastering ? 10 : 5).toFixed(2)}" title="Waste percentage for this material" required>
+            </label>
+            <div class="framed-wall-options">
+                <div class="side-selection" id="sideSelection${materialCount}">
+                    <div class="side-box">
+                        <label>
+                            Side 1:
+                            <input type="checkbox" id="side1${materialCount}" title="Apply this material to the first side">
+                        </label>
+                        <label class="plies-label">
+                            Plies for Side 1:
+                            <input type="number" id="pliesSide1${materialCount}" min="1" step="1" value="1" title="Number of layers for Side 1" required>
+                        </label>
+                    </div>
+                    <div class="side-box">
+                        <label>
+                            Side 2:
+                            <input type="checkbox" id="side2${materialCount}" title="Apply this material to the second side">
+                        </label>
+                        <label class="plies-label">
+                            Plies for Side 2:
+                            <input type="number" id="pliesSide2${materialCount}" min="1" step="1" value="1" title="Number of layers for Side 2" required>
+                        </label>
                     </div>
                 </div>
+            </div>
+        `;
+        materialsContainer.appendChild(materialCard);
+        // Add event listener for the newly created material select
+        const newMaterialSelect = materialCard.querySelector(`#materialType${materialCount}`);
+        newMaterialSelect.addEventListener('change', () => updateMaterialOptions(newMaterialSelect));
+        // Initialize options for the new material card
+        updateMaterialOptions(newMaterialSelect);
+    }
+    function removeMaterial(id) {
+        const materialCard = document.getElementById(`material-card-${id}`);
+        if (materialCard) {
+            materialCard.remove();
+        }
+    }
+    // Added a helper function to safely divide numbers
+    function safeDivide(value, divisor) {
+        return parseFloat(value) && parseFloat(divisor) > 0 ? (parseFloat(value) / parseFloat(divisor)).toFixed(2) : '0.00';
+    }
+    // Added a function to handle toggling sections in the Cost tab
+    function toggleSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        const toggleBtn = section.previousElementSibling;
+        toggleBtn.classList.toggle('active');
+        section.classList.toggle('visible');
+    }
+    function calculateResults(event) {
+        event.preventDefault();
+        const form = event.target;
+        const resultsDiv = document.getElementById('results');
+        const messageDiv = document.getElementById('message');
+        const currencySymbol = getCurrencySymbol(document.getElementById('currency').value);
+        // Get input values and fix invalid ids
+        const length = parseFloat(form.length.value);
+        const height = parseFloat(form.height.value);
+        const doorArea = parseFloat(form.doorArea.value);
+        // Corrected ID from "window Area" to "windowArea"
+        const windowArea = parseFloat(document.getElementById('windowArea').value);
+        // Corrected ID from "plaster Thickness" to "plasterThickness"
+        const plasteringThickness = parseFloat(document.getElementById('plasterThickness').value);
+        const plasterSide1 = document.getElementById('plasterSide1').checked;
+        const plasterSide2 = document.getElementById('plasterSide2').checked;
+        const studsCost = parseFloat(form.studCost.value);
+        const trackCost = parseFloat(form.trackCost.value);
+        const screwCost = parseFloat(form.screwCost.value);
+        const jointCompoundCost = parseFloat(form.jointCompoundCost.value);
+        const sealantCost = parseFloat(form.sealantCost.value);
+        const rebarCost = parseFloat(form.rebarCost.value);
+        const connectorCost = parseFloat(form.connectorCost.value);
+        const mortarCementCost = parseFloat(form.mortarCementCost.value);
+        const mortarSandCost = parseFloat(form.mortarSandCost.value);
+        const mortarWaterCost = parseFloat(form.mortarWaterCost.value);
+        const plasteringCementCost = parseFloat(form.plasterCementCost.value);
+        const plasteringSandCost = parseFloat(form.plasterSandCost.value);
+        const plasteringWaterCost = parseFloat(form.plasterWaterCost.value);
+        const laborCostPerSqm = parseFloat(form.laborCost.value);
+        const laborers = parseFloat(form.laborers.value);
+        const contingency = parseFloat(form.contingency.value);
+        const prepTime = parseFloat(form.prepTime.value);
+        const cleanupTime = parseFloat(form.cleanupTime.value);
+        const overheadPercent = parseFloat(form.overheadPercent.value);
+        const equipmentPercent = parseFloat(form.equipmentPercent.value);
+        const profitMargin = parseFloat(form.profitMargin.value);
+        // Calculations based on provided formulas in the Guidelines section
+        const wallArea = Math.max(0, (length * height) - (doorArea + windowArea));
+        let totalMaterialCost = 0;
+        let totalAccessoryCost = 0;
+        let totalProductivityRate = 0;
+        let materialResultsHtml = '';
+        document.querySelectorAll('.material-card').forEach(materialCard => {
+            const materialId = materialCard.id.replace('material-card-', '');
+            const materialType = document.getElementById(`materialType${materialId}`).value;
+            const materialUnitCost = parseFloat(document.getElementById(`materialCost${materialId}`).value);
+            const wasteFactor = parseFloat(document.getElementById(`wasteFactor${materialId}`).value) / 100;
+            const side1Checked = document.getElementById(`side1${materialId}`).checked;
+            const side2Checked = document.getElementById(`side2${materialId}`).checked;
+            const pliesSide1 = side1Checked ? parseInt(document.getElementById(`pliesSide1${materialId}`).value) : 0;
+            const pliesSide2 = side2Checked ? parseInt(document.getElementById(`pliesSide2${materialId}`).value) : 0;
+            const totalPlies = pliesSide1 + pliesSide2;
+            const config = materialConfig[materialType];
+            const unitArea = config.unitArea;
+            const materialQuantity = Math.ceil(wallArea / unitArea) * (1 + wasteFactor) * totalPlies;
+            const materialCost = materialQuantity * materialUnitCost;
+            totalMaterialCost += materialCost;
+            totalProductivityRate += config.productivityRate * totalPlies;
+            let accessoriesCost = 0;
+            let accessoriesHtml = '';
+            if (config.isFramedWall) {
+                const studQuantity = Math.ceil(length / 0.6) * height * totalPlies;
+                const trackQuantity = 2 * length * totalPlies;
+                const screwQuantity = Math.ceil(wallArea * 25) * totalPlies;
+                const jointCompoundQuantity = wallArea * 0.5 * totalPlies;
+                const sealantQuantity = length * 0.1;
+                const connectorQuantity = Math.ceil(wallArea / 2);
+                accessoriesCost += (studQuantity * studsCost) + (trackQuantity * trackCost) + (screwQuantity * screwCost) + (jointCompoundQuantity * jointCompoundCost) + (sealantQuantity * sealantCost) + (connectorQuantity * connectorCost);
+                accessoriesHtml = `
+                    <p><strong>Studs:</strong> <span class="value">${studQuantity.toFixed(2)} m</span></p>
+                    <p><strong>Tracks:</strong> <span class="value">${trackQuantity.toFixed(2)} m</span></p>
+                    <p><strong>Screws:</strong> <span class="value">${screwQuantity.toFixed(2)} pcs</span></p>
+                    <p><strong>Joint Compound:</strong> <span class="value">${jointCompoundQuantity.toFixed(2)} kg</span></p>
+                    <p><strong>Sealant:</strong> <span class="value">${sealantQuantity.toFixed(2)} tubes</span></p>
+                    <p><strong>Connectors:</strong> <span class="value">${connectorQuantity.toFixed(2)} pcs</span></p>
+                `;
+            } else {
+                const mortarVolume = wallArea * 0.01;
+                const mortarCementBags = Math.ceil(mortarVolume * 0.25 / 0.025 * (1 + wasteFactor));
+                const mortarSandTons = mortarVolume * 0.75 * 1.6 * (1 + wasteFactor);
+                const mortarWater = mortarVolume * 0.5;
+                const rebarLength = wallArea * 0.1;
+                accessoriesCost += (mortarCementBags * mortarCementCost) + (mortarSandTons * mortarSandCost) + (mortarWater * mortarWaterCost) + (rebarLength * rebarCost) + (connectorQuantity * connectorCost);
+                accessoriesHtml = `
+                    <p><strong>Mortar Cement:</strong> <span class="value">${mortarCementBags.toFixed(2)} bags</span></p>
+                    <p><strong>Mortar Sand:</strong> <span class="value">${mortarSandTons.toFixed(2)} tons</span></p>
+                    <p><strong>Mortar Water:</strong> <span class="value">${mortarWater.toFixed(2)} m³</span></p>
+                    <p><strong>Rebar:</strong> <span class="value">${rebarLength.toFixed(2)} m</span></p>
+                    <p><strong>Connectors:</strong> <span class="value">${connectorQuantity.toFixed(2)} pcs</span></p>
+                `;
+            }
+            totalAccessoryCost += accessoriesCost;
+            materialResultsHtml += `
+                <h4>${config.name} (Layer ${materialId})</h4>
+                <p><strong>Quantity:</strong> <span class="value">${materialQuantity.toFixed(2)} ${config.unit}</span></p>
+                <p><strong>Cost:</strong> <span class="value">${currencySymbol}${materialCost.toFixed(2)}</span></p>
+                <h5>Accessories:</h5>
+                ${accessoriesHtml}
             `;
-            materialsContainer.appendChild(materialCard);
-
-            const materialTypeSelect = document.getElementById(`materialType${materialCount}`);
-            const boardTypeSelect = document.getElementById(`boardType${materialCount}`);
-            const thicknessSelect = document.getElementById(`thickness${materialCount}`);
-            const dimensionsSelect = document.getElementById(`dimensions${materialCount}`);
-            const sideSelectionDiv = document.getElementById(`sideSelection${materialCount}`);
-
-            const populateDropdowns = (materialKey) => {
-                const config = materialConfig[materialKey];
-                boardTypeSelect.innerHTML = config.types.map(type => `<option value="${type}">${type}</option>`).join('');
-                thicknessSelect.innerHTML = config.thicknesses ? config.thicknesses.map(t => `<option value="${t}">${t} mm</option>`).join('') : '';
-                thicknessSelect.style.display = config.thicknesses ? 'block' : 'none';
-                dimensionsSelect.innerHTML = config.dimensions ? config.dimensions.map(d => `<option value="${d}">${d}</option>`).join('') : '';
-                dimensionsSelect.style.display = config.dimensions ? 'block' : 'none';
-                document.getElementById(`wasteFactor${materialCount}`).value = (config.needsPlastering ? 10 : 5).toFixed(2);
-            };
-
-            const toggleFramedWallFields = (materialKey) => {
-                const config = materialConfig[materialKey];
-                const framedWallOptions = materialCard.querySelector('.framed-wall-options');
-                if (config.isFramedWall) {
-                    framedWallOptions.style.display = 'block';
-                    document.getElementById(`pliesSide1${materialCount}`).setAttribute('required', 'required');
-                    document.getElementById(`pliesSide2${materialCount}`).setAttribute('required', 'required');
-                    document.getElementById(`side1${materialCount}`).checked = true;
-                    document.getElementById(`side2${materialCount}`).disabled = false;
-                } else {
-                    framedWallOptions.style.display = 'none';
-                    document.getElementById(`pliesSide1${materialCount}`).removeAttribute('required');
-                    document.getElementById(`pliesSide2${materialCount}`).removeAttribute('required');
-                    document.getElementById(`side1${materialCount}`).checked = true;
-                    document.getElementById(`side2${materialCount}`).checked = false;
-                    document.getElementById(`side2${materialCount}`).disabled = true;
-                }
-            };
-
-            materialTypeSelect.addEventListener('change', (e) => {
-                const selectedMaterial = e.target.value;
-                populateDropdowns(selectedMaterial);
-                toggleFramedWallFields(selectedMaterial);
-            });
-
-            populateDropdowns(materialTypeSelect.value);
-            toggleFramedWallFields(materialTypeSelect.value);
+        });
+        // Plastering calculation
+        let plasteringCost = 0;
+        let plasteringArea = 0;
+        let plasteringResultsHtml = '';
+        if (plasterSide1 || plasterSide2) {
+            plasteringArea = wallArea * (plasterSide1 + plasterSide2);
+            const plasterCementBags = Math.ceil(plasteringArea * 0.01 * 0.25 / 0.025 * (1 + 0.1));
+            const plasterSandTons = plasteringArea * 0.01 * 0.75 * 1.6 * (1 + 0.1);
+            const plasterWater = plasteringArea * 0.01 * 0.5;
+            plasteringCost = (plasterCementBags * plasteringCementCost) + (plasterSandTons * plasteringSandCost) + (plasterWater * plasteringWaterCost);
+            plasteringResultsHtml = `
+                <p><strong>Plastering Area:</strong> <span class="value">${plasteringArea.toFixed(2)} m²</span></p>
+                <p><strong>Plaster Cement:</strong> <span class="value">${plasterCementBags.toFixed(2)} bags</span></p>
+                <p><strong>Plaster Sand:</strong> <span class="value">${plasterSandTons.toFixed(2)} tons</span></p>
+                <p><strong>Plaster Water:</strong> <span class="value">${plasterWater.toFixed(2)} m³</span></p>
+            `;
         }
-
-        function removeMaterial(id) {
-            const materialCard = document.getElementById(`material-card-${id}`);
-            if (materialCard) materialCard.remove();
+        // Labor calculations
+        const avgProductivityRate = totalProductivityRate > 0 ? totalProductivityRate / document.querySelectorAll('.material-card').length : 0;
+        const installationDays = wallArea / avgProductivityRate;
+        const totalDays = (prepTime + installationDays + cleanupTime) / laborers;
+        const laborCost = wallArea * laborCostPerSqm;
+        // Cost summary
+        const baseCosts = totalMaterialCost + totalAccessoryCost + plasteringCost + laborCost;
+        const contingencyCost = baseCosts * (contingency / 100);
+        const overheadCost = baseCosts * (overheadPercent / 100);
+        const equipmentCost = baseCosts * (equipmentPercent / 100);
+        const profitCost = (baseCosts + contingencyCost + overheadCost + equipmentCost) * (profitMargin / 100);
+        const totalCost = baseCosts + contingencyCost + overheadCost + equipmentCost + profitCost;
+        // Update results
+        document.getElementById('wallLengthResult').textContent = `${length.toFixed(2)} m`;
+        document.getElementById('wallHeightResult').textContent = `${height.toFixed(2)} m`;
+        document.getElementById('doorAreaResult').textContent = `${doorArea.toFixed(2)} m²`;
+        document.getElementById('windowAreaResult').textContent = `${windowArea.toFixed(2)} m²`;
+        document.getElementById('wallArea').textContent = `${wallArea.toFixed(2)} m²`;
+        document.getElementById('materialResults').innerHTML = materialResultsHtml;
+        document.getElementById('plasteringResultsContainer').innerHTML = `
+            <h3>Plastering Materials</h3>
+            ${plasteringResultsHtml}
+        `;
+        document.getElementById('laborersResult').textContent = laborers;
+        document.getElementById('productivityRate').textContent = `${avgProductivityRate.toFixed(2)} m²/day`;
+        document.getElementById('prepTimeResult').textContent = `${prepTime.toFixed(2)} days`;
+        document.getElementById('installTime').textContent = `${installationDays.toFixed(2)} days`;
+        document.getElementById('cleanupTimeResult').textContent = `${cleanupTime.toFixed(2)} days`;
+        document.getElementById('totalDays').textContent = `${totalDays.toFixed(2)} days`;
+        // Update cost summary table
+        document.getElementById('materialCostResult').textContent = totalMaterialCost.toFixed(2);
+        document.getElementById('materialCostSqm').textContent = safeDivide(totalMaterialCost, wallArea);
+        document.getElementById('accessoryCostResult').textContent = totalAccessoryCost.toFixed(2);
+        document.getElementById('accessoryCostSqm').textContent = safeDivide(totalAccessoryCost, wallArea);
+        document.getElementById('plasteringCostResult').textContent = plasteringCost.toFixed(2);
+        document.getElementById('plasteringCostSqm').textContent = safeDivide(plasteringCost, wallArea);
+        document.getElementById('laborCostResult').textContent = laborCost.toFixed(2);
+        document.getElementById('laborCostSqm').textContent = safeDivide(laborCost, wallArea);
+        document.getElementById('contingencyCostResult').textContent = contingencyCost.toFixed(2);
+        document.getElementById('contingencyCostSqm').textContent = safeDivide(contingencyCost, wallArea);
+        document.getElementById('overheadCostResult').textContent = overheadCost.toFixed(2);
+        document.getElementById('overheadCostSqm').textContent = safeDivide(overheadCost, wallArea);
+        document.getElementById('equipmentCostResult').textContent = equipmentCost.toFixed(2);
+        document.getElementById('equipmentCostSqm').textContent = safeDivide(equipmentCost, wallArea);
+        document.getElementById('profitCostResult').textContent = profitCost.toFixed(2);
+        document.getElementById('profitCostSqm').textContent = safeDivide(profitCost, wallArea);
+        document.getElementById('totalCost').textContent = totalCost.toFixed(2);
+        document.getElementById('totalCostSqm').textContent = safeDivide(totalCost, wallArea);
+        // Show results
+        resultsDiv.style.display = 'block';
+        messageDiv.className = 'success';
+        messageDiv.textContent = 'Calculation complete!';
+        window.scrollTo(0, resultsDiv.offsetTop);
+    }
+    // Added helper function to get currency symbol
+    function getCurrencySymbol(currency) {
+        switch (currency) {
+            case 'PHP':
+                return '₱';
+            case 'USD':
+                return '$';
+            case 'EUR':
+                return '€';
+            case 'JPY':
+                return '¥';
+            default:
+                return '';
         }
-
-        function toggleSection(id) {
-            const section = document.getElementById(id);
-            const toggleHeader = section.previousElementSibling;
-            section.classList.toggle('visible');
-            toggleHeader.classList.toggle('active');
-        }
-
-        function displayError(message) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.className = 'error';
-            messageDiv.textContent = message;
-            document.getElementById('results').style.display = 'block';
+    }
+    // Added helper function to show errors
+    function displayError(message) {
+        const messageDiv = document.getElementById('message');
+        messageDiv.className = 'error';
+        messageDiv.textContent = message;
+        document.getElementById('results').style.display = 'block';
         }
 
         function calculateResults(event) {
