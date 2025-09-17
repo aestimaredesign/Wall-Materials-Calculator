@@ -941,230 +941,231 @@
         }
 
         function calculateResults(event) {
-            event.preventDefault();
-            console.log('Calculate button clicked');
-            const form = document.getElementById('calculatorForm');
-            if (!form) {
-                console.error('Form element not found');
-                displayError('Internal error: Form not found');
-                return;
-            }
+    event.preventDefault();
+    console.log('Calculate button clicked');
+    const form = document.getElementById('calculatorForm');
+    if (!form) {
+        console.error('Form element not found');
+        displayError('Internal error: Form not found');
+        return;
+    }
 
-            const lengthInput = document.getElementById('length');
-            const heightInput = document.getElementById('height');
-            console.log('Length input:', lengthInput.value);
-            console.log('Height input:', heightInput.value);
+    const lengthInput = document.getElementById('length');
+    const heightInput = document.getElementById('height');
+    console.log('Length input:', lengthInput.value);
+    console.log('Height input:', heightInput.value);
 
-            const wallLength = parseFloat(lengthInput.value) || 0;
-            const wallHeight = parseFloat(heightInput.value) || 0;
-            const plasterSide1 = document.getElementById('plasterSide1').checked;
-            const plasterSide2 = document.getElementById('plasterSide2').checked;
-            const plasterThickness = parseFloat(document.getElementById('plasterThickness').value) || 10;
-            const currency = document.getElementById('currency').value;
-            const studCost = parseFloat(document.getElementById('studCost').value) || 0;
-            const trackCost = parseFloat(document.getElementById('trackCost').value) || 0;
-            const screwCost = parseFloat(document.getElementById('screwCost').value) || 0;
-            const jointCompoundCost = parseFloat(document.getElementById('jointCompoundCost').value) || 0;
-            const sealantCost = parseFloat(document.getElementById('sealantCost').value) || 0;
-            const rebarCost = parseFloat(document.getElementById('rebarCost').value) || 0;
-            const connectorCost = parseFloat(document.getElementById('connectorCost').value) || 0;
-            const mortarCementCost = parseFloat(document.getElementById('mortarCementCost').value) || 0;
-            const mortarSandCost = parseFloat(document.getElementById('mortarSandCost').value) || 0;
-            const mortarWaterCost = parseFloat(document.getElementById('mortarWaterCost').value) || 0;
-            const plasterCementCost = parseFloat(document.getElementById('plasterCementCost').value) || 0;
-            const plasterSandCost = parseFloat(document.getElementById('plasterSandCost').value) || 0;
-            const plasterWaterCost = parseFloat(document.getElementById('plasterWaterCost').value) || 0;
-            const laborCostPerSqM = parseFloat(document.getElementById('laborCost').value) || 0;
-            const numberOfLaborers = parseInt(document.getElementById('laborers').value) || 1;
-            const contingencyPercent = parseFloat(document.getElementById('contingency').value) / 100 || 0;
+    const wallLength = parseFloat(lengthInput.value) || 0;
+    const wallHeight = parseFloat(heightInput.value) || 0;
+    const plasterSide1 = document.getElementById('plasterSide1').checked;
+    const plasterSide2 = document.getElementById('plasterSide2').checked;
+    const plasterThickness = parseFloat(document.getElementById('plasterThickness').value) || 10;
+    const currency = document.getElementById('currency').value;
+    const studCost = parseFloat(document.getElementById('studCost').value) || 0;
+    const trackCost = parseFloat(document.getElementById('trackCost').value) || 0;
+    const screwCost = parseFloat(document.getElementById('screwCost').value) || 0;
+    const jointCompoundCost = parseFloat(document.getElementById('jointCompoundCost').value) || 0;
+    const sealantCost = parseFloat(document.getElementById('sealantCost').value) || 0;
+    const rebarCost = parseFloat(document.getElementById('rebarCost').value) || 0;
+    const connectorCost = parseFloat(document.getElementById('connectorCost').value) || 0;
+    const mortarCementCost = parseFloat(document.getElementById('mortarCementCost').value) || 0;
+    const mortarSandCost = parseFloat(document.getElementById('mortarSandCost').value) || 0;
+    const mortarWaterCost = parseFloat(document.getElementById('mortarWaterCost').value) || 0;
+    const plasterCementCost = parseFloat(document.getElementById('plasterCementCost').value) || 0;
+    const plasterSandCost = parseFloat(document.getElementById('plasterSandCost').value) || 0;
+    const plasterWaterCost = parseFloat(document.getElementById('plasterWaterCost').value) || 0;
+    const laborCostPerSqM = parseFloat(document.getElementById('laborCost').value) || 0;
+    const numberOfLaborers = parseInt(document.getElementById('laborers').value) || 1;
+    const contingencyPercent = parseFloat(document.getElementById('contingency').value) / 100 || 0;
 
-            if (isNaN(wallLength) || isNaN(wallHeight) || wallLength <= 0 || wallHeight <= 0) {
-                console.error('Invalid dimensions: Length=', wallLength, 'Height=', wallHeight);
-                displayError('Please enter valid wall dimensions (greater than 0).');
-                return;
-            }
+    if (isNaN(wallLength) || isNaN(wallHeight) || wallLength <= 0 || wallHeight <= 0) {
+        console.error('Invalid dimensions: Length=', wallLength, 'Height=', wallHeight);
+        displayError('Please enter valid wall dimensions (greater than 0).');
+        return;
+    }
 
-            const wallArea = wallLength * wallHeight;
-            let totalMaterialCost = 0;
-            let totalAccessoryCost = 0;
-            let totalPlasteringCost = 0;
-            let totalPlies = 0;
-            let totalProductivityRate = 0;
-            let mainMaterialResults = {};
-            let accessoryResults = {};
-            let plasteringResults = {};
-            const materialCards = document.querySelectorAll('.material-card');
+    const wallArea = wallLength * wallHeight;
+    let totalMaterialCost = 0;
+    let totalAccessoryCost = 0;
+    let totalPlasteringCost = 0;
+    let totalPlies = 0;
+    let totalProductivityRate = 0;
+    let mainMaterialResults = {};
+    let accessoryResults = {};
+    let plasteringResults = {};
+    const materialCards = document.querySelectorAll('.material-card');
 
-            if (materialCards.length === 0) {
-                console.error('No material layers added');
-                displayError('Please add at least one material layer.');
-                return;
-            }
+    if (materialCards.length === 0) {
+        console.error('No material layers added');
+        displayError('Please add at least one material layer.');
+        return;
+    }
 
-            let validMaterials = true;
-            materialCards.forEach(card => {
-                const id = card.id.split('-')[2];
-                const materialType = document.getElementById(`materialType${id}`).value;
-                const materialCost = parseFloat(document.getElementById(`materialCost${id}`).value);
-                const config = materialConfig[materialType];
-                const side1 = config.isFramedWall ? document.getElementById(`side1${id}`).checked : true;
-                const side2 = config.isFramedWall ? document.getElementById(`side2${id}`).checked : false;
-                const pliesSide1 = config.isFramedWall && side1 ? parseInt(document.getElementById(`pliesSide1${id}`).value) || 1 : 1;
-                const pliesSide2 = config.isFramedWall && side2 ? parseInt(document.getElementById(`pliesSide2${id}`).value) || 1 : 1;
+    let validMaterials = true;
+    materialCards.forEach(card => {
+        const id = card.id.split('-')[2];
+        const materialType = document.getElementById(`materialType${id}`).value;
+        const materialCost = parseFloat(document.getElementById(`materialCost${id}`).value);
+        const config = materialConfig[materialType];
+        const side1 = config.isFramedWall ? document.getElementById(`side1${id}`).checked : true;
+        const side2 = config.isFramedWall ? document.getElementById(`side2${id}`).checked : false;
+        const pliesSide1 = config.isFramedWall && side1 ? parseInt(document.getElementById(`pliesSide1${id}`).value) || 1 : 1;
+        const pliesSide2 = config.isFramedWall && side2 ? parseInt(document.getElementById(`pliesSide2${id}`).value) || 1 : 1;
 
-                console.log(`Material ${id}: Type=${materialType}, Cost=${materialCost}, Side1=${side1}, Side2=${side2}, Plies1=${pliesSide1}, Plies2=${pliesSide2}`);
+        console.log(`Material ${id}: Type=${materialType}, Cost=${materialCost}, Side1=${side1}, Side2=${side2}, Plies1=${pliesSide1}, Plies2=${pliesSide2}`);
 
-                if (isNaN(materialCost) || materialCost < 0) {
-                    console.error(`Invalid material cost for ${config.name}: ${materialCost}`);
-                    displayError(`Invalid material cost for ${config.name}. Please enter a valid number.`);
-                    validMaterials = false;
-                    return;
-                }
-
-                if (config.isFramedWall && !side1 && !side2) {
-                    console.error(`No side selected for ${config.name}`);
-                    displayError(`Please select at least one side for ${config.name}.`);
-                    validMaterials = false;
-                    return;
-                }
-
-                const unitArea = config.unitArea;
-                const wasteFactor = wasteFactors[materialType];
-
-                if (!unitArea) {
-                    console.error(`Missing unit area for material: ${config.name}`);
-                    displayError(`Missing unit area for material: ${config.name}`);
-                    validMaterials = false;
-                    return;
-                }
-
-                let materialQuantity = 0;
-                if (side1) materialQuantity += Math.ceil((wallArea / unitArea) * pliesSide1);
-                if (side2) materialQuantity += Math.ceil((wallArea / unitArea) * pliesSide2);
-
-                materialQuantity = Math.ceil(materialQuantity * (1 + wasteFactor));
-                const currentMaterialCost = materialQuantity * materialCost;
-                totalMaterialCost += currentMaterialCost;
-
-                if (!mainMaterialResults[config.name]) {
-                    mainMaterialResults[config.name] = { quantity: 0, cost: 0, unit: config.unit };
-                }
-                mainMaterialResults[config.name].quantity += materialQuantity;
-                mainMaterialResults[config.name].cost += currentMaterialCost;
-
-                if (config.isFramedWall) {
-                    totalPlies += (side1 ? pliesSide1 : 0) + (side2 ? pliesSide2 : 0);
-                }
-
-                if (config.productivityRate) {
-                    totalProductivityRate += config.productivityRate * ((side1 ? pliesSide1 : 0) + (side2 ? pliesSide2 : 0));
-                }
-
-                if (config.accessories.connectors) {
-                    const connectors = Math.ceil(wallArea / 2);
-                    accessoryResults['Connectors'] = { quantity: isNaN(connectors) ? 0 : connectors.toFixed(0), cost: isNaN(connectors * connectorCost) ? 0 : (connectors * connectorCost), unit: 'pieces' };
-                    totalAccessoryCost += connectors * connectorCost;
-                }
-                if (config.accessories.sealants && !accessoryResults['Sealant']) {
-                    const sealant = wallLength * 0.1;
-                    accessoryResults['Sealant'] = { quantity: isNaN(sealant) ? 0 : sealant.toFixed(2), cost: isNaN(sealant * sealantCost) ? 0 : (sealant * sealantCost), unit: 'tubes' };
-                    totalAccessoryCost += sealant * sealantCost;
-                }
-            });
-
-            if (!validMaterials) return;
-
-            const totalFramedWallPlies = totalPlies;
-            if (totalFramedWallPlies > 0) {
-                const studs = Math.ceil((wallLength / 0.6) * wallHeight * totalFramedWallPlies);
-                const tracks = Math.ceil(2 * wallLength * totalFramedWallPlies);
-                const screws = Math.ceil(wallArea * 25 * totalFramedWallPlies);
-                const jointCompound = wallArea * 0.5 * totalFramedWallPlies;
-
-                accessoryResults['Studs'] = { quantity: isNaN(studs) ? 0 : studs.toFixed(0), cost: isNaN(studs * studCost) ? 0 : (studs * studCost), unit: 'm' };
-                accessoryResults['Tracks'] = { quantity: isNaN(tracks) ? 0 : tracks.toFixed(0), cost: isNaN(tracks * trackCost) ? 0 : (tracks * trackCost), unit: 'm' };
-                accessoryResults['Screws'] = { quantity: isNaN(screws) ? 0 : screws.toFixed(0), cost: isNaN(screws * screwCost) ? 0 : (screws * screwCost), unit: 'pieces' };
-                accessoryResults['Joint Compound'] = { quantity: isNaN(jointCompound) ? 0 : jointCompound.toFixed(2), cost: isNaN(jointCompound * jointCompoundCost) ? 0 : (jointCompound * jointCompoundCost), unit: 'kg' };
-                totalAccessoryCost += (studs * studCost) + (tracks * trackCost) + (screws * screwCost) + (jointCompound * jointCompoundCost);
-            }
-
-            const isMasonry = Array.from(materialCards).some(card => {
-                const materialType = document.getElementById(`materialType${card.id.split('-')[2]}`).value;
-                return materialType === 'chb' || materialType === 'aac';
-            });
-            if (isMasonry) {
-    const mortarVolume = wallArea * 0.01; // Assuming 1 cm mortar layer per m²
-    const mortarCementBags = Math.ceil((mortarVolume * 0.25) / 0.025 * (1 + wasteFactors['chb']));
-    const mortarSandCubicMeters = mortarVolume * 0.75 * (1 + wasteFactors['chb']); // Sand in m³
-    const mortarWater = mortarVolume * 0.5;
-
-    accessoryResults['Mortar Cement'] = { quantity: isNaN(mortarCementBags) ? 0 : mortarCementBags.toFixed(0), cost: isNaN(mortarCementBags * mortarCementCost) ? 0 : (mortarCementBags * mortarCementCost), unit: 'bags' };
-    accessoryResults['Mortar Sand'] = { quantity: isNaN(mortarSandCubicMeters) ? 0 : mortarSandCubicMeters.toFixed(2), cost: isNaN(mortarSandCubicMeters * mortarSandCost) ? 0 : (mortarSandCubicMeters * mortarSandCost), unit: 'm³' };
-    accessoryResults['Mortar Water'] = { quantity: isNaN(mortarWater) ? 0 : mortarWater.toFixed(2), cost: isNaN(mortarWater * mortarWaterCost) ? 0 : (mortarWater * mortarWaterCost), unit: 'm³' };
-
-    totalAccessoryCost += (mortarCementBags * mortarCementCost) + (mortarSandCubicMeters * mortarSandCost) + (mortarWater * mortarWaterCost);
-}
-
-let plasteringArea = 0;
-if (plasterSide1) plasteringArea += wallArea;
-if (plasterSide2) plasteringArea += wallArea;
-
-if (plasteringArea > 0 && !isNaN(plasterThickness)) {
-    const plasterVolume = plasteringArea * (plasterThickness / 1000);
-    const plasterCementBags = Math.ceil((plasterVolume * 0.25) / 0.025);
-    const plasterSandCubicMeters = plasterVolume * 0.75; // Sand in m³
-    const plasterWater = plasterVolume * 0.5;
-
-    plasteringResults['Plaster Cement'] = { quantity: isNaN(plasterCementBags) ? 0 : plasterCementBags.toFixed(0), cost: isNaN(plasterCementBags * plasterCementCost) ? 0 : (plasterCementBags * plasterCementCost), unit: 'bags' };
-    plasteringResults['Plaster Sand'] = { quantity: isNaN(plasterSandCubicMeters) ? 0 : plasterSandCubicMeters.toFixed(2), cost: isNaN(plasterSandCubicMeters * plasterSandCost) ? 0 : (plasterSandCubicMeters * plasterSandCost), unit: 'm³' };
-    plasteringResults['Plaster Water'] = { quantity: isNaN(plasterWater) ? 0 : plasterWater.toFixed(2), cost: isNaN(plasterWater * plasterWaterCost) ? 0 : (plasterWater * plasterWaterCost), unit: 'm³' };
-
-    totalPlasteringCost = (plasterCementBags * plasterCementCost) + (plasterSandCubicMeters * plasterSandCost) + (plasterWater * plasterWaterCost);
-}
-
-            const laborCost = wallArea * laborCostPerSqM;
-            const totalProjectCost = totalMaterialCost + totalAccessoryCost + totalPlasteringCost + laborCost;
-            const contingencyCost = totalProjectCost * contingencyPercent;
-            const grandTotalCost = totalProjectCost + contingencyCost;
-
-            const installationDays = totalProductivityRate > 0 ? (wallArea / totalProductivityRate) : 0;
-            const totalDays = installationDays + productivityConfig.prep + productivityConfig.cleanup;
-
-            resultsData = {
-                projectName: document.getElementById('projectName').value,
-                projectLocation: document.getElementById('projectLocation').value,
-                clientName: document.getElementById('clientName').value,
-                companyName: document.getElementById('companyName').value,
-                date: document.getElementById('date').value,
-                preparedBy: document.getElementById('preparedBy').value,
-                wallLength: wallLength,
-                wallHeight: wallHeight,
-                wallArea: wallArea,
-                plasterSide1: plasterSide1,
-                plasterSide2: plasterSide2,
-                plasterThickness: plasterThickness,
-                currency: currency,
-                currencySymbol: getCurrencySymbol(currency),
-                materials: mainMaterialResults,
-                accessories: accessoryResults,
-                plastering: plasteringResults,
-                laborCost: laborCost,
-                contingency: contingencyCost,
-                totalCost: grandTotalCost,
-                laborers: numberOfLaborers,
-                productivityRate: totalProductivityRate.toFixed(2),
-                prepTime: productivityConfig.prep,
-                installTime: installationDays.toFixed(2),
-                cleanupTime: productivityConfig.cleanup,
-                totalDays: totalDays.toFixed(2),
-                materialCost: totalMaterialCost,
-                accessoryCost: totalAccessoryCost,
-                plasteringCost: totalPlasteringCost
-            };
-
-            console.log('Results calculated:', resultsData);
-            displayResults();
+        if (isNaN(materialCost) || materialCost < 0) {
+            console.error(`Invalid material cost for ${config.name}: ${materialCost}`);
+            displayError(`Invalid material cost for ${config.name}. Please enter a valid number.`);
+            validMaterials = false;
+            return;
         }
+
+        if (config.isFramedWall && !side1 && !side2) {
+            console.error(`No side selected for ${config.name}`);
+            displayError(`Please select at least one side for ${config.name}.`);
+            validMaterials = false;
+            return;
+        }
+
+        const unitArea = config.unitArea;
+        const wasteFactor = wasteFactors[materialType];
+
+        if (!unitArea) {
+            console.error(`Missing unit area for material: ${config.name}`);
+            displayError(`Missing unit area for material: ${config.name}`);
+            validMaterials = false;
+            return;
+        }
+
+        let materialQuantity = 0;
+        if (side1) materialQuantity += Math.ceil((wallArea / unitArea) * pliesSide1);
+        if (side2) materialQuantity += Math.ceil((wallArea / unitArea) * pliesSide2);
+
+        materialQuantity = Math.ceil(materialQuantity * (1 + wasteFactor));
+        const currentMaterialCost = materialQuantity * materialCost;
+        totalMaterialCost += currentMaterialCost;
+
+        if (!mainMaterialResults[config.name]) {
+            mainMaterialResults[config.name] = { quantity: 0, cost: 0, unit: config.unit };
+        }
+        mainMaterialResults[config.name].quantity += materialQuantity;
+        mainMaterialResults[config.name].cost += currentMaterialCost;
+
+        if (config.isFramedWall) {
+            totalPlies += (side1 ? pliesSide1 : 0) + (side2 ? pliesSide2 : 0);
+        }
+
+        if (config.productivityRate) {
+            totalProductivityRate += config.productivityRate * ((side1 ? pliesSide1 : 0) + (side2 ? pliesSide2 : 0));
+        }
+
+        if (config.accessories.connectors) {
+            const connectors = Math.ceil(wallArea / 2);
+            accessoryResults['Connectors'] = { quantity: isNaN(connectors) ? 0 : connectors.toFixed(0), cost: isNaN(connectors * connectorCost) ? 0 : (connectors * connectorCost), unit: 'pieces' };
+            totalAccessoryCost += connectors * connectorCost;
+        }
+        if (config.accessories.sealants && !accessoryResults['Sealant']) {
+            const sealant = wallLength * 0.1;
+            accessoryResults['Sealant'] = { quantity: isNaN(sealant) ? 0 : sealant.toFixed(2), cost: isNaN(sealant * sealantCost) ? 0 : (sealant * sealantCost), unit: 'tubes' };
+            totalAccessoryCost += sealant * sealantCost;
+        }
+    });
+
+    if (!validMaterials) return;
+
+    const totalFramedWallPlies = totalPlies;
+    if (totalFramedWallPlies > 0) {
+        const studs = Math.ceil((wallLength / 0.6) * wallHeight * totalFramedWallPlies);
+        const tracks = Math.ceil(2 * wallLength * totalFramedWallPlies);
+        const screws = Math.ceil(wallArea * 25 * totalFramedWallPlies);
+        const jointCompound = wallArea * 0.5 * totalFramedWallPlies;
+
+        accessoryResults['Studs'] = { quantity: isNaN(studs) ? 0 : studs.toFixed(0), cost: isNaN(studs * studCost) ? 0 : (studs * studCost), unit: 'm' };
+        accessoryResults['Tracks'] = { quantity: isNaN(tracks) ? 0 : tracks.toFixed(0), cost: isNaN(tracks * trackCost) ? 0 : (tracks * trackCost), unit: 'm' };
+        accessoryResults['Screws'] = { quantity: isNaN(screws) ? 0 : screws.toFixed(0), cost: isNaN(screws * screwCost) ? 0 : (screws * screwCost), unit: 'pieces' };
+        accessoryResults['Joint Compound'] = { quantity: isNaN(jointCompound) ? 0 : jointCompound.toFixed(2), cost: isNaN(jointCompound * jointCompoundCost) ? 0 : (jointCompound * jointCompoundCost), unit: 'kg' };
+        totalAccessoryCost += (studs * studCost) + (tracks * trackCost) + (screws * screwCost) + (jointCompound * jointCompoundCost);
+    }
+
+    const isMasonry = Array.from(materialCards).some(card => {
+        const materialType = document.getElementById(`materialType${card.id.split('-')[2]}`).value;
+        return materialType === 'chb' || materialType === 'aac';
+    });
+    if (isMasonry) {
+        const mortarVolume = wallArea * 0.01; // Assuming 1 cm mortar layer per m²
+        const mortarCementBags = Math.ceil((mortarVolume * 0.25) / 0.025 * (1 + wasteFactors['chb']));
+        const mortarSandCubicMeters = mortarVolume * 0.75 * (1 + wasteFactors['chb']); // Sand in m³
+        const mortarWater = mortarVolume * 0.5;
+
+        accessoryResults['Mortar Cement'] = { quantity: isNaN(mortarCementBags) ? 0 : mortarCementBags.toFixed(0), cost: isNaN(mortarCementBags * mortarCementCost) ? 0 : (mortarCementBags * mortarCementCost), unit: 'bags' };
+        accessoryResults['Mortar Sand'] = { quantity: isNaN(mortarSandCubicMeters) ? 0 : mortarSandCubicMeters.toFixed(2), cost: isNaN(mortarSandCubicMeters * mortarSandCost) ? 0 : (mortarSandCubicMeters * mortarSandCost), unit: 'm³' };
+        accessoryResults['Mortar Water'] = { quantity: isNaN(mortarWater) ? 0 : mortarWater.toFixed(2), cost: isNaN(mortarWater * mortarWaterCost) ? 0 : (mortarWater * mortarWaterCost), unit: 'm³' };
+
+        totalAccessoryCost += (mortarCementBags * mortarCementCost) + (mortarSandCubicMeters * mortarSandCost) + (mortarWater * mortarWaterCost);
+    }
+
+    let plasteringArea = 0;
+    if (plasterSide1) plasteringArea += wallArea;
+    if (plasterSide2) plasteringArea += wallArea;
+
+    if (plasteringArea > 0 && !isNaN(plasterThickness)) {
+        const plasterVolume = plasteringArea * (plasterThickness / 1000);
+        const plasterCementBags = Math.ceil((plasterVolume * 0.25) / 0.025);
+        const plasterSandCubicMeters = plasterVolume * 0.75; // Sand in m³
+        const plasterWater = plasterVolume * 0.5;
+
+        plasteringResults['Plaster Cement'] = { quantity: isNaN(plasterCementBags) ? 0 : plasterCementBags.toFixed(0), cost: isNaN(plasterCementBags * plasterCementCost) ? 0 : (plasterCementBags * plasterCementCost), unit: 'bags' };
+        plasteringResults['Plaster Sand'] = { quantity: isNaN(plasterSandCubicMeters) ? 0 : plasterSandCubicMeters.toFixed(2), cost: isNaN(plasterSandCubicMeters * plasterSandCost) ? 0 : (plasterSandCubicMeters * plasterSandCost), unit: 'm³' };
+        plasteringResults['Plaster Water'] = { quantity: isNaN(plasterWater) ? 0 : plasterWater.toFixed(2), cost: isNaN(plasterWater * plasterWaterCost) ? 0 : (plasterWater * plasterWaterCost), unit: 'm³' };
+
+        totalPlasteringCost = (plasterCementBags * plasterCementCost) + (plasterSandCubicMeters * plasterSandCost) + (plasterWater * plasterWaterCost);
+    }
+
+    const laborCost = wallArea * laborCostPerSqM;
+    const totalProjectCost = totalMaterialCost + totalAccessoryCost + totalPlasteringCost + laborCost;
+    const contingencyCost = totalProjectCost * contingencyPercent;
+    const grandTotalCost = totalProjectCost + contingencyCost;
+
+    const installationDays = totalProductivityRate > 0 ? (wallArea / totalProductivityRate) : 0;
+    const totalDays = installationDays + productivityConfig.prep + productivityConfig.cleanup;
+
+    // Assign to global window object
+    window.resultsData = {
+        projectName: document.getElementById('projectName').value,
+        projectLocation: document.getElementById('projectLocation').value,
+        clientName: document.getElementById('clientName').value,
+        companyName: document.getElementById('companyName').value,
+        date: document.getElementById('date').value,
+        preparedBy: document.getElementById('preparedBy').value,
+        wallLength: wallLength,
+        wallHeight: wallHeight,
+        wallArea: wallArea,
+        plasterSide1: plasterSide1,
+        plasterSide2: plasterSide2,
+        plasterThickness: plasterThickness,
+        currency: currency,
+        currencySymbol: getCurrencySymbol(currency),
+        materials: mainMaterialResults,
+        accessories: accessoryResults,
+        plastering: plasteringResults,
+        laborCost: laborCost,
+        contingency: contingencyCost,
+        totalCost: grandTotalCost,
+        laborers: numberOfLaborers,
+        productivityRate: totalProductivityRate.toFixed(2),
+        prepTime: productivityConfig.prep,
+        installTime: installationDays.toFixed(2),
+        cleanupTime: productivityConfig.cleanup,
+        totalDays: totalDays.toFixed(2),
+        materialCost: totalMaterialCost,
+        accessoryCost: totalAccessoryCost,
+        plasteringCost: totalPlasteringCost
+    };
+
+    console.log('Global resultsData set:', window.resultsData);
+    displayResults();
+}
 
         function displayResults() {
             console.log('Displaying results');
@@ -1255,7 +1256,7 @@ if (plasteringArea > 0 && !isNaN(plasterThickness)) {
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    const resultsData = window.resultsData; // Explicitly use the global resultsData
+    const resultsData = window.resultsData;
 
     const currencySymbol = resultsData.currencySymbol || '';
 
