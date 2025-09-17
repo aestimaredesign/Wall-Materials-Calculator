@@ -7,7 +7,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <style>
-        /* Your CSS remains the same */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -370,7 +369,7 @@
     <div class="wall-calculator">
         <div class="calculator-form">
             <h1>Wall Materials Calculator</h1>
-            <form id="calculatorForm">
+                        <form id="calculatorForm">
                 <div class="tab-container">
                     <div class="tab active" data-tab="project">Project Info</div>
                     <div class="tab" data-tab="materials">Materials</div>
@@ -533,7 +532,7 @@
                                 <td class="cost-value"><span id="currencySymbolContingency"></span><span id="contingencyCostResult"></span></td>
                                 <td class="cost-value"><span id="currencySymbolContingencySqm"></span><span id="contingencyCostSqm"></span></td>
                             </tr>
-                                                        <tr>
+                            <tr>
                                 <td>Overhead Cost</td>
                                 <td class="cost-value"><span id="currencySymbolOverhead"></span><span id="overheadCostResult"></span></td>
                                 <td class="cost-value"><span id="currencySymbolOverheadSqm"></span><span id="overheadCostSqm"></span></td>
@@ -607,406 +606,207 @@
     </div>
     <script>
         let resultsData = null;
-    let materialCount = 0;
-    const materialConfig = {
-        'gypsum': { name: 'Gypsum Board', types: ['Ordinary', 'Moisture-Resistant', 'Fire-Resistant', 'Acoustic', 'Impact-Resistant'], thicknesses: ['9', '12', '15', '16'], dimensions: ['1200 x 2400 mm', '1200 x 3000 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 12, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-        'fiber-cement': { name: 'Fiber Cement Board', types: ['Ordinary', 'Moisture-Resistant', 'Exterior Grade'], thicknesses: ['4.5', '6', '9', '12', '16'], dimensions: ['1200 x 2400 mm', '1200 x 3000 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 10, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-        'cement-board': { name: 'Cement Board', types: ['Standard Tile Backer', 'Moisture/Mold Resistant', 'Heavy-Duty'], thicknesses: ['6', '9', '12', '16'], dimensions: ['1200 x 2400 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 9, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-        'calcium-silicate': { name: 'Calcium Silicate Board', types: ['Standard', 'Moisture-Resistant', 'Fire-Resistant', 'Acoustic'], thicknesses: ['6', '9', '12', '15'], dimensions: ['1200 x 2400 mm', '600 x 1200 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 11, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-        'mgo': { name: 'Magnesium Oxide Board', types: ['Standard', 'Moisture/Mold-Resistant', 'Fire Resistant'], thicknesses: ['6', '9', '12', '15'], dimensions: ['1200 x 2400 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 10, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-        'plywood': { name: 'Plywood', types: ['Interior Grade', 'Marine Plywood', 'Phenolic Film-Faced', 'Acoustic'], thicknesses: ['3', '6', '9', '12', '15', '18', '25'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 15, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-        'mdf': { name: 'MDF', types: ['Standard MDF', 'Moisture-Resistant MDF', 'Fire-Retardant MDF'], thicknesses: ['3', '6', '9', '12', '15', '18', '25'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 14, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-        'particle-board': { name: 'Particle Board', types: ['Standard', 'Laminated', 'Moisture-Resistant'], thicknesses: ['9', '12', '15', '18'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 13, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-        'osb': { name: 'OSB', types: ['Standard', 'Exterior Grade', 'Fire-Resistant'], thicknesses: ['9', '12', '15', '18'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 12, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
-        'chb': { name: 'Concrete Hollow Block', types: ['4-inch', '6-inch'], thicknesses: ['100', '150'], unit: 'pieces', unitArea: 0.12, needsPlastering: true, productivityRate: 8, accessories: { studs: false, tracks: false, screws: false, jointCompound: false, sealants: false, mortar: true, rebars: true, connectors: true }, supportsPlies: false, isBoard: false, isFramedWall: false },
-        'sips': { name: 'Structural Insulated Panels (SIPs)', types: ['Standard', 'High Insulation', 'Fire Resistant'], thicknesses: ['100', '150', '200'], dimensions: ['1200 x 2400 mm', '1200 x 3000 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 15, accessories: { studs: false, tracks: false, screws: true, jointCompound: true, sealants: true, mortar: false, rebars: false, connectors: true }, supportsPlies: false, isBoard: true, isFramedWall: false },
-        'aac': { name: 'Autoclaved Aerated Concrete (AAC)', types: ['Standard Block', 'Reinforced Block'], thicknesses: ['100', '150', '200'], unit: 'blocks', unitArea: 0.12, needsPlastering: true, productivityRate: 7, accessories: { studs: false, tracks: false, screws: false, jointCompound: false, sealants: false, mortar: true, rebars: true, connectors: true }, supportsPlies: false, isBoard: false, isFramedWall: false },
-        'precast': { name: 'Precast Concrete Wall', types: ['Standard Panel', 'Insulated Panel', 'Decorative'], thicknesses: ['100', '150', '200'], dimensions: ['1200 x 3000 mm'], unit: 'panels', unitArea: 3.6, needsPlastering: false, productivityRate: 20, accessories: { studs: false, tracks: false, screws: false, jointCompound: false, sealants: true, mortar: false, rebars: false, connectors: true }, supportsPlies: false, isBoard: true, isFramedWall: false }
-    };
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('DOM loaded, initializing calculator');
-        // Initialize tabs
-        initTabs();
-        const form = document.getElementById('calculatorForm');
-        if (!form) {
-            console.error('Form element not found');
-            displayError('Internal error: Form not found');
-            return;
-        }
-        form.addEventListener('submit', calculateResults);
-        // Add one material layer on page load
-        addMaterial();
-    });
-    function initTabs() {
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                tab.classList.add('active');
-                const tabId = tab.getAttribute('data-tab');
-                document.getElementById(`${tabId}-tab`).classList.add('active');
-            });
-        });
-    }
-    // Added this function to handle dynamic updates on the materials tab
-    function updateMaterialOptions(materialSelect) {
-        const materialCard = materialSelect.closest('.material-card');
-        const materialId = materialSelect.id.replace('materialType', '');
-        const selectedMaterial = materialConfig[materialSelect.value];
-        const boardTypeSelect = materialCard.querySelector(`#boardType${materialId}`);
-        const thicknessSelect = materialCard.querySelector(`#thickness${materialId}`);
-        const dimensionsSelect = materialCard.querySelector(`#dimensions${materialId}`);
-        const wasteFactorInput = materialCard.querySelector(`#wasteFactor${materialId}`);
-        const framedWallOptions = materialCard.querySelector('.framed-wall-options');
-        // Clear previous options
-        boardTypeSelect.innerHTML = '';
-        thicknessSelect.innerHTML = '';
-        dimensionsSelect.innerHTML = '';
-        // Hide framed wall options for non-framed walls
-        if (selectedMaterial.isFramedWall) {
-            framedWallOptions.style.display = 'block';
-        } else {
-            framedWallOptions.style.display = 'none';
-        }
-        // Populate new options based on material config
-        if (selectedMaterial.types) {
-            selectedMaterial.types.forEach(type => {
-                const option = document.createElement('option');
-                option.value = type;
-                option.textContent = type;
-                boardTypeSelect.appendChild(option);
-            });
-        }
-        if (selectedMaterial.thicknesses) {
-            selectedMaterial.thicknesses.forEach(thickness => {
-                const option = document.createElement('option');
-                option.value = thickness;
-                option.textContent = thickness;
-                thicknessSelect.appendChild(option);
-            });
-        }
-        if (selectedMaterial.dimensions) {
-            selectedMaterial.dimensions.forEach(dim => {
-                const option = document.createElement('option');
-                option.value = dim;
-                option.textContent = dim;
-                dimensionsSelect.appendChild(option);
-            });
-        }
-        // Set waste factor
-        wasteFactorInput.value = (selectedMaterial.needsPlastering ? 10 : 5).toFixed(2);
-    }
-    function addMaterial() {
-        materialCount++;
-        const materialsContainer = document.getElementById('materials-container');
-        const materialCard = document.createElement('div');
-        materialCard.className = 'material-card';
-        materialCard.id = `material-card-${materialCount}`;
-        const materialSelectOptions = Object.keys(materialConfig).map(key => `<option value="${key}">${materialConfig[key].name}</option>`).join('');
-        materialCard.innerHTML = `
-            <div class="material-header">
-                <h3>Material Layer ${materialCount}</h3>
-                <button type="button" class="remove-material" onclick="removeMaterial(${materialCount})">Remove</button>
-            </div>
-            <label>
-                Material Type:
-                <select id="materialType${materialCount}" class="material-type-select" title="Select the type of material">
-                    ${materialSelectOptions}
-                </select>
-            </label>
-            <label>
-                Board Type:
-                <select id="boardType${materialCount}" title="Select the specific board type"></select>
-            </label>
-            <label>
-                Thickness (mm):
-                <select id="thickness${materialCount}" title="Select the material thickness"></select>
-            </label>
-            <label>
-                Dimensions:
-                <select id="dimensions${materialCount}" title="Select the material dimensions"></select>
-            </label>
-            <label>
-                Material Cost (per unit):
-                <input type="number" id="materialCost${materialCount}" step="0.01" min="0" value="300" title="Cost of one unit of this material" required>
-            </label>
-            <label>
-                Waste Factor (%):
-                <input type="number" id="wasteFactor${materialCount}" step="0.01" min="0" max="20" value="${(materialConfig[Object.keys(materialConfig)[0]].needsPlastering ? 10 : 5).toFixed(2)}" title="Waste percentage for this material" required>
-            </label>
-            <div class="framed-wall-options">
-                <div class="side-selection" id="sideSelection${materialCount}">
-                    <div class="side-box">
-                        <label>
-                            Side 1:
-                            <input type="checkbox" id="side1${materialCount}" title="Apply this material to the first side">
-                        </label>
-                        <label class="plies-label">
-                            Plies for Side 1:
-                            <input type="number" id="pliesSide1${materialCount}" min="1" step="1" value="1" title="Number of layers for Side 1" required>
-                        </label>
-                    </div>
-                    <div class="side-box">
-                        <label>
-                            Side 2:
-                            <input type="checkbox" id="side2${materialCount}" title="Apply this material to the second side">
-                        </label>
-                        <label class="plies-label">
-                            Plies for Side 2:
-                            <input type="number" id="pliesSide2${materialCount}" min="1" step="1" value="1" title="Number of layers for Side 2" required>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        `;
-        materialsContainer.appendChild(materialCard);
-        // Add event listener for the newly created material select
-        const newMaterialSelect = materialCard.querySelector(`#materialType${materialCount}`);
-        newMaterialSelect.addEventListener('change', () => updateMaterialOptions(newMaterialSelect));
-        // Initialize options for the new material card
-        updateMaterialOptions(newMaterialSelect);
-    }
-    function removeMaterial(id) {
-        const materialCard = document.getElementById(`material-card-${id}`);
-        if (materialCard) {
-            materialCard.remove();
-        }
-    }
-    // Added a helper function to safely divide numbers
-    function safeDivide(value, divisor) {
-        return parseFloat(value) && parseFloat(divisor) > 0 ? (parseFloat(value) / parseFloat(divisor)).toFixed(2) : '0.00';
-    }
-    // Added a function to handle toggling sections in the Cost tab
-    function toggleSection(sectionId) {
-        const section = document.getElementById(sectionId);
-        const toggleBtn = section.previousElementSibling;
-        toggleBtn.classList.toggle('active');
-        section.classList.toggle('visible');
-    }
-    function calculateResults(event) {
-        event.preventDefault();
-        const form = event.target;
-        const resultsDiv = document.getElementById('results');
-        const messageDiv = document.getElementById('message');
-        const currencySymbol = getCurrencySymbol(document.getElementById('currency').value);
-        // Get input values and fix invalid ids
-        const length = parseFloat(form.length.value);
-        const height = parseFloat(form.height.value);
-        const doorArea = parseFloat(form.doorArea.value);
-        // Corrected ID from "window Area" to "windowArea"
-        const windowArea = parseFloat(document.getElementById('windowArea').value);
-        // Corrected ID from "plaster Thickness" to "plasterThickness"
-        const plasteringThickness = parseFloat(document.getElementById('plasterThickness').value);
-        const plasterSide1 = document.getElementById('plasterSide1').checked;
-        const plasterSide2 = document.getElementById('plasterSide2').checked;
-        const studsCost = parseFloat(form.studCost.value);
-        const trackCost = parseFloat(form.trackCost.value);
-        const screwCost = parseFloat(form.screwCost.value);
-        const jointCompoundCost = parseFloat(form.jointCompoundCost.value);
-        const sealantCost = parseFloat(form.sealantCost.value);
-        const rebarCost = parseFloat(form.rebarCost.value);
-        const connectorCost = parseFloat(form.connectorCost.value);
-        const mortarCementCost = parseFloat(form.mortarCementCost.value);
-        const mortarSandCost = parseFloat(form.mortarSandCost.value);
-        const mortarWaterCost = parseFloat(form.mortarWaterCost.value);
-        const plasteringCementCost = parseFloat(form.plasterCementCost.value);
-        const plasteringSandCost = parseFloat(form.plasterSandCost.value);
-        const plasteringWaterCost = parseFloat(form.plasterWaterCost.value);
-        const laborCostPerSqm = parseFloat(form.laborCost.value);
-        const laborers = parseFloat(form.laborers.value);
-        const contingency = parseFloat(form.contingency.value);
-        const prepTime = parseFloat(form.prepTime.value);
-        const cleanupTime = parseFloat(form.cleanupTime.value);
-        const overheadPercent = parseFloat(form.overheadPercent.value);
-        const equipmentPercent = parseFloat(form.equipmentPercent.value);
-        const profitMargin = parseFloat(form.profitMargin.value);
-        // Calculations based on provided formulas in the Guidelines section
-        const wallArea = Math.max(0, (length * height) - (doorArea + windowArea));
-        let totalMaterialCost = 0;
-        let totalAccessoryCost = 0;
-        let totalProductivityRate = 0;
-        let materialResultsHtml = '';
-        document.querySelectorAll('.material-card').forEach(materialCard => {
-            const materialId = materialCard.id.replace('material-card-', '');
-            const materialType = document.getElementById(`materialType${materialId}`).value;
-            const materialUnitCost = parseFloat(document.getElementById(`materialCost${materialId}`).value);
-            const wasteFactor = parseFloat(document.getElementById(`wasteFactor${materialId}`).value) / 100;
-            const side1Checked = document.getElementById(`side1${materialId}`).checked;
-            const side2Checked = document.getElementById(`side2${materialId}`).checked;
-            const pliesSide1 = side1Checked ? parseInt(document.getElementById(`pliesSide1${materialId}`).value) : 0;
-            const pliesSide2 = side2Checked ? parseInt(document.getElementById(`pliesSide2${materialId}`).value) : 0;
-            const totalPlies = pliesSide1 + pliesSide2;
-            const config = materialConfig[materialType];
-            const unitArea = config.unitArea;
-            const materialQuantity = Math.ceil(wallArea / unitArea) * (1 + wasteFactor) * totalPlies;
-            const materialCost = materialQuantity * materialUnitCost;
-            totalMaterialCost += materialCost;
-            totalProductivityRate += config.productivityRate * totalPlies;
-            let accessoriesCost = 0;
-            let accessoriesHtml = '';
-            if (config.isFramedWall) {
-                const studQuantity = Math.ceil(length / 0.6) * height * totalPlies;
-                const trackQuantity = 2 * length * totalPlies;
-                const screwQuantity = Math.ceil(wallArea * 25) * totalPlies;
-                const jointCompoundQuantity = wallArea * 0.5 * totalPlies;
-                const sealantQuantity = length * 0.1;
-                const connectorQuantity = Math.ceil(wallArea / 2);
-                accessoriesCost += (studQuantity * studsCost) + (trackQuantity * trackCost) + (screwQuantity * screwCost) + (jointCompoundQuantity * jointCompoundCost) + (sealantQuantity * sealantCost) + (connectorQuantity * connectorCost);
-                accessoriesHtml = `
-                    <p><strong>Studs:</strong> <span class="value">${studQuantity.toFixed(2)} m</span></p>
-                    <p><strong>Tracks:</strong> <span class="value">${trackQuantity.toFixed(2)} m</span></p>
-                    <p><strong>Screws:</strong> <span class="value">${screwQuantity.toFixed(2)} pcs</span></p>
-                    <p><strong>Joint Compound:</strong> <span class="value">${jointCompoundQuantity.toFixed(2)} kg</span></p>
-                    <p><strong>Sealant:</strong> <span class="value">${sealantQuantity.toFixed(2)} tubes</span></p>
-                    <p><strong>Connectors:</strong> <span class="value">${connectorQuantity.toFixed(2)} pcs</span></p>
-                `;
-            } else {
-                const mortarVolume = wallArea * 0.01;
-                const mortarCementBags = Math.ceil(mortarVolume * 0.25 / 0.025 * (1 + wasteFactor));
-                const mortarSandTons = mortarVolume * 0.75 * 1.6 * (1 + wasteFactor);
-                const mortarWater = mortarVolume * 0.5;
-                const rebarLength = wallArea * 0.1;
-                accessoriesCost += (mortarCementBags * mortarCementCost) + (mortarSandTons * mortarSandCost) + (mortarWater * mortarWaterCost) + (rebarLength * rebarCost) + (connectorQuantity * connectorCost);
-                accessoriesHtml = `
-                    <p><strong>Mortar Cement:</strong> <span class="value">${mortarCementBags.toFixed(2)} bags</span></p>
-                    <p><strong>Mortar Sand:</strong> <span class="value">${mortarSandTons.toFixed(2)} tons</span></p>
-                    <p><strong>Mortar Water:</strong> <span class="value">${mortarWater.toFixed(2)} m³</span></p>
-                    <p><strong>Rebar:</strong> <span class="value">${rebarLength.toFixed(2)} m</span></p>
-                    <p><strong>Connectors:</strong> <span class="value">${connectorQuantity.toFixed(2)} pcs</span></p>
-                `;
-            }
-            totalAccessoryCost += accessoriesCost;
-            materialResultsHtml += `
-                <h4>${config.name} (Layer ${materialId})</h4>
-                <p><strong>Quantity:</strong> <span class="value">${materialQuantity.toFixed(2)} ${config.unit}</span></p>
-                <p><strong>Cost:</strong> <span class="value">${currencySymbol}${materialCost.toFixed(2)}</span></p>
-                <h5>Accessories:</h5>
-                ${accessoriesHtml}
-            `;
-        });
-        // Plastering calculation
-        let plasteringCost = 0;
-        let plasteringArea = 0;
-        let plasteringResultsHtml = '';
-        if (plasterSide1 || plasterSide2) {
-            plasteringArea = wallArea * (plasterSide1 + plasterSide2);
-            const plasterCementBags = Math.ceil(plasteringArea * 0.01 * 0.25 / 0.025 * (1 + 0.1));
-            const plasterSandTons = plasteringArea * 0.01 * 0.75 * 1.6 * (1 + 0.1);
-            const plasterWater = plasteringArea * 0.01 * 0.5;
-            plasteringCost = (plasterCementBags * plasteringCementCost) + (plasterSandTons * plasteringSandCost) + (plasterWater * plasteringWaterCost);
-            plasteringResultsHtml = `
-                <p><strong>Plastering Area:</strong> <span class="value">${plasteringArea.toFixed(2)} m²</span></p>
-                <p><strong>Plaster Cement:</strong> <span class="value">${plasterCementBags.toFixed(2)} bags</span></p>
-                <p><strong>Plaster Sand:</strong> <span class="value">${plasterSandTons.toFixed(2)} tons</span></p>
-                <p><strong>Plaster Water:</strong> <span class="value">${plasterWater.toFixed(2)} m³</span></p>
-            `;
-        }
-        // Labor calculations
-        const avgProductivityRate = totalProductivityRate > 0 ? totalProductivityRate / document.querySelectorAll('.material-card').length : 0;
-        const installationDays = wallArea / avgProductivityRate;
-        const totalDays = (prepTime + installationDays + cleanupTime) / laborers;
-        const laborCost = wallArea * laborCostPerSqm;
-        // Cost summary
-        const baseCosts = totalMaterialCost + totalAccessoryCost + plasteringCost + laborCost;
-        const contingencyCost = baseCosts * (contingency / 100);
-        const overheadCost = baseCosts * (overheadPercent / 100);
-        const equipmentCost = baseCosts * (equipmentPercent / 100);
-        const profitCost = (baseCosts + contingencyCost + overheadCost + equipmentCost) * (profitMargin / 100);
-        const totalCost = baseCosts + contingencyCost + overheadCost + equipmentCost + profitCost;
-        // Update results
-        document.getElementById('wallLengthResult').textContent = `${length.toFixed(2)} m`;
-        document.getElementById('wallHeightResult').textContent = `${height.toFixed(2)} m`;
-        document.getElementById('doorAreaResult').textContent = `${doorArea.toFixed(2)} m²`;
-        document.getElementById('windowAreaResult').textContent = `${windowArea.toFixed(2)} m²`;
-        document.getElementById('wallArea').textContent = `${wallArea.toFixed(2)} m²`;
-        document.getElementById('materialResults').innerHTML = materialResultsHtml;
-        document.getElementById('plasteringResultsContainer').innerHTML = `
-            <h3>Plastering Materials</h3>
-            ${plasteringResultsHtml}
-        `;
-        document.getElementById('laborersResult').textContent = laborers;
-        document.getElementById('productivityRate').textContent = `${avgProductivityRate.toFixed(2)} m²/day`;
-        document.getElementById('prepTimeResult').textContent = `${prepTime.toFixed(2)} days`;
-        document.getElementById('installTime').textContent = `${installationDays.toFixed(2)} days`;
-        document.getElementById('cleanupTimeResult').textContent = `${cleanupTime.toFixed(2)} days`;
-        document.getElementById('totalDays').textContent = `${totalDays.toFixed(2)} days`;
-        // Update cost summary table
-        document.getElementById('materialCostResult').textContent = totalMaterialCost.toFixed(2);
-        document.getElementById('materialCostSqm').textContent = safeDivide(totalMaterialCost, wallArea);
-        document.getElementById('accessoryCostResult').textContent = totalAccessoryCost.toFixed(2);
-        document.getElementById('accessoryCostSqm').textContent = safeDivide(totalAccessoryCost, wallArea);
-        document.getElementById('plasteringCostResult').textContent = plasteringCost.toFixed(2);
-        document.getElementById('plasteringCostSqm').textContent = safeDivide(plasteringCost, wallArea);
-        document.getElementById('laborCostResult').textContent = laborCost.toFixed(2);
-        document.getElementById('laborCostSqm').textContent = safeDivide(laborCost, wallArea);
-        document.getElementById('contingencyCostResult').textContent = contingencyCost.toFixed(2);
-        document.getElementById('contingencyCostSqm').textContent = safeDivide(contingencyCost, wallArea);
-        document.getElementById('overheadCostResult').textContent = overheadCost.toFixed(2);
-        document.getElementById('overheadCostSqm').textContent = safeDivide(overheadCost, wallArea);
-        document.getElementById('equipmentCostResult').textContent = equipmentCost.toFixed(2);
-        document.getElementById('equipmentCostSqm').textContent = safeDivide(equipmentCost, wallArea);
-        document.getElementById('profitCostResult').textContent = profitCost.toFixed(2);
-        document.getElementById('profitCostSqm').textContent = safeDivide(profitCost, wallArea);
-        document.getElementById('totalCost').textContent = totalCost.toFixed(2);
-        document.getElementById('totalCostSqm').textContent = safeDivide(totalCost, wallArea);
-        // Show results
-        resultsDiv.style.display = 'block';
-        messageDiv.className = 'success';
-        messageDiv.textContent = 'Calculation complete!';
-        window.scrollTo(0, resultsDiv.offsetTop);
-    }
-    // Added helper function to get currency symbol
-    function getCurrencySymbol(currency) {
-        switch (currency) {
-            case 'PHP':
-                return '₱';
-            case 'USD':
-                return '$';
-            case 'EUR':
-                return '€';
-            case 'JPY':
-                return '¥';
-            default:
-                return '';
-        }
-    }
-    // Added helper function to show errors
-    function displayError(message) {
-        const messageDiv = document.getElementById('message');
-        messageDiv.className = 'error';
-        messageDiv.textContent = message;
-        document.getElementById('results').style.display = 'block';
-        }
+        let materialCount = 0;
 
-        function calculateResults(event) {
-            event.preventDefault();
-            console.log('Calculate button clicked');
+        const materialConfig = {
+            'gypsum': { name: 'Gypsum Board', types: ['Ordinary', 'Moisture-Resistant', 'Fire-Resistant', 'Acoustic', 'Impact-Resistant'], thicknesses: ['9', '12', '15', '16'], dimensions: ['1200 x 2400 mm', '1200 x 3000 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 12, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+            'fiber-cement': { name: 'Fiber Cement Board', types: ['Ordinary', 'Moisture-Resistant', 'Exterior Grade'], thicknesses: ['4.5', '6', '9', '12', '16'], dimensions: ['1200 x 2400 mm', '1200 x 3000 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 10, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+            'cement-board': { name: 'Cement Board', types: ['Standard Tile Backer', 'Moisture/Mold Resistant', 'Heavy-Duty'], thicknesses: ['6', '9', '12', '16'], dimensions: ['1200 x 2400 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 9, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+            'calcium-silicate': { name: 'Calcium Silicate Board', types: ['Standard', 'Moisture-Resistant', 'Fire-Resistant', 'Acoustic'], thicknesses: ['6', '9', '12', '15'], dimensions: ['1200 x 2400 mm', '600 x 1200 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 11, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+            'mgo': { name: 'Magnesium Oxide Board', types: ['Standard', 'Moisture/Mold-Resistant', 'Fire Resistant'], thicknesses: ['6', '9', '12', '15'], dimensions: ['1200 x 2400 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 10, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+            'plywood': { name: 'Plywood', types: ['Interior Grade', 'Marine Plywood', 'Phenolic Film-Faced', 'Acoustic'], thicknesses: ['3', '6', '9', '12', '15', '18', '25'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 15, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+            'mdf': { name: 'MDF', types: ['Standard MDF', 'Moisture-Resistant MDF', 'Fire-Retardant MDF'], thicknesses: ['3', '6', '9', '12', '15', '18', '25'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 14, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+            'particle-board': { name: 'Particle Board', types: ['Standard', 'Laminated', 'Moisture-Resistant'], thicknesses: ['9', '12', '15', '18'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 13, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+            'osb': { name: 'OSB', types: ['Standard', 'Exterior Grade', 'Fire-Resistant'], thicknesses: ['9', '12', '15', '18'], dimensions: ['1220 x 2440 mm'], unit: 'sheets', unitArea: 2.9768, needsPlastering: false, productivityRate: 12, accessories: { studs: true, tracks: true, screws: true, jointCompound: true, sealants: false, mortar: false, rebars: false, connectors: false }, supportsPlies: true, isBoard: true, isFramedWall: true },
+            'chb': { name: 'Concrete Hollow Block', types: ['4-inch', '6-inch'], thicknesses: ['100', '150'], unit: 'pieces', unitArea: 0.12, needsPlastering: true, productivityRate: 8, accessories: { studs: false, tracks: false, screws: false, jointCompound: false, sealants: false, mortar: true, rebars: true, connectors: true }, supportsPlies: false, isBoard: false, isFramedWall: false },
+            'sips': { name: 'Structural Insulated Panels (SIPs)', types: ['Standard', 'High Insulation', 'Fire Resistant'], thicknesses: ['100', '150', '200'], dimensions: ['1200 x 2400 mm', '1200 x 3000 mm'], unit: 'panels', unitArea: 2.88, needsPlastering: false, productivityRate: 15, accessories: { studs: false, tracks: false, screws: true, jointCompound: true, sealants: true, mortar: false, rebars: false, connectors: true }, supportsPlies: false, isBoard: true, isFramedWall: false },
+            'aac': { name: 'Autoclaved Aerated Concrete (AAC)', types: ['Standard Block', 'Reinforced Block'], thicknesses: ['100', '150', '200'], unit: 'blocks', unitArea: 0.12, needsPlastering: true, productivityRate: 7, accessories: { studs: false, tracks: false, screws: false, jointCompound: false, sealants: false, mortar: true, rebars: true, connectors: true }, supportsPlies: false, isBoard: false, isFramedWall: false },
+            'precast': { name: 'Precast Concrete Wall', types: ['Standard Panel', 'Insulated Panel', 'Decorative'], thicknesses: ['100', '150', '200'], dimensions: ['1200 x 3000 mm'], unit: 'panels', unitArea: 3.6, needsPlastering: false, productivityRate: 20, accessories: { studs: false, tracks: false, screws: false, jointCompound: false, sealants: true, mortar: false, rebars: false, connectors: true }, supportsPlies: false, isBoard: true, isFramedWall: false }
+        };
 
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, initializing calculator');
+            initTabs();
             const form = document.getElementById('calculatorForm');
             if (!form) {
                 console.error('Form element not found');
                 displayError('Internal error: Form not found');
                 return;
             }
+            form.addEventListener('submit', calculateResults);
+            addMaterial(); // Add one material layer on page load
+        });
 
-            const lengthInput = document.getElementById('length');
-            const heightInput = document.getElementById('height');
-            const doorAreaInput = document.getElementById('doorArea');
-            const windowAreaInput = document.getElementById('windowArea');
-            const prepTimeInput = document.getElementById('prepTime');
-            const cleanupTimeInput = document.getElementById('cleanupTime');
-            const overheadPercentInput = document.getElementById('overheadPercent');
-            const equipmentPercentInput = document.getElementById('equipmentPercent');
-            const profitMarginInput = document.getElementById('profitMargin');
+        function initTabs() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    tab.classList.add('active');
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+        }
+                function addMaterial() {
+            materialCount++;
+            const container = document.getElementById('materials-container');
+            const materialCard = document.createElement('div');
+            materialCard.className = 'material-card';
+            materialCard.id = `material-${materialCount}`;
+            materialCard.innerHTML = `
+                <div class="material-header">
+                    <h3>Material Layer ${materialCount}</h3>
+                    <button class="remove-material" onclick="removeMaterial(${materialCount})">Remove</button>
+                </div>
+                <label>Material Type:
+                    <select id="materialType-${materialCount}" onchange="updateMaterialOptions(${materialCount})" title="Select the type of material">
+                        <option value="">Select Material</option>
+                        ${Object.keys(materialConfig).map(key => `<option value="${key}">${materialConfig[key].name}</option>`).join('')}
+                    </select>
+                </label>
+                <label>Type:
+                    <select id="materialTypeDetail-${materialCount}" title="Select the specific type of material">
+                        <option value="">Select Type</option>
+                    </select>
+                </label>
+                <label>Thickness (mm):
+                    <select id="materialThickness-${materialCount}" title="Select the thickness of the material">
+                        <option value="">Select Thickness</option>
+                    </select>
+                </label>
+                <label>Dimension:
+                    <select id="materialDimension-${materialCount}" title="Select the dimension of the material">
+                        <option value="">Select Dimension</option>
+                    </select>
+                </label>
+                <label>Cost per Unit (${document.getElementById('currency')?.value || 'PHP'}):
+                    <input type="number" id="materialCost-${materialCount}" step="0.01" min="0" value="0" title="Cost per unit of the material" required>
+                </label>
+                <label>Waste Factor (%):
+                    <input type="number" id="wasteFactor-${materialCount}" step="1" min="0" max="50" value="5" title="Percentage of waste factor" required>
+                </label>
+                <div class="framed-wall-options" id="framedWallOptions-${materialCount}" style="display:none;">
+                    <label class="plies-label">Number of Plies:
+                        <input type="number" id="plies-${materialCount}" step="1" min="1" value="1" title="Number of plies for framed walls">
+                    </label>
+                </div>
+            `;
+            container.appendChild(materialCard);
+            updateMaterialOptions(materialCount);
+        }
 
-            const wallLength = parseFloat(lengthInput.value) || 0;
-            const wallHeight = parseFloat(heightInput.value) || 0;
-            const doorArea = parseFloat(doorAreaInput.value) || 0;
-            const windowArea = parseFloat(windowAreaInput.value) || 0;
-            const plasterSide1 = document.getElementById('plasterSide1').checked;
-            const plasterSide2 = document.getElementById('plasterSide2').checked;
-            const plasterThickness = parseFloat(document.getElementById('plasterThickness').value) || 10;
-            const currency = document.getElementById('currency').value;
+        function removeMaterial(index) {
+            const materialCard = document.getElementById(`material-${index}`);
+            if (materialCard) {
+                materialCard.remove();
+                materialCount = Math.max(0, materialCount - 1);
+                // Reindex remaining materials if needed (simplified approach)
+                const cards = document.querySelectorAll('.material-card');
+                cards.forEach((card, i) => {
+                    card.querySelector('h3').textContent = `Material Layer ${i + 1}`;
+                    card.id = `material-${i + 1}`;
+                    card.querySelector('button').setAttribute('onclick', `removeMaterial(${i + 1})`);
+                    card.querySelectorAll('select, input').forEach(input => {
+                        const id = input.id.replace(/\d+/, i + 1);
+                        input.id = id;
+                        if (input.tagName === 'SELECT' && input.onchange) {
+                            input.onchange = new Function(`updateMaterialOptions(${i + 1})`);
+                        }
+                    });
+                });
+            }
+        }
+
+        function updateMaterialOptions(index) {
+            const materialType = document.getElementById(`materialType-${index}`).value;
+            const typeSelect = document.getElementById(`materialTypeDetail-${index}`);
+            const thicknessSelect = document.getElementById(`materialThickness-${index}`);
+            const dimensionSelect = document.getElementById(`materialDimension-${index}`);
+            const framedOptions = document.getElementById(`framedWallOptions-${index}`);
+
+            typeSelect.innerHTML = '<option value="">Select Type</option>';
+            thicknessSelect.innerHTML = '<option value="">Select Thickness</option>';
+            dimensionSelect.innerHTML = '<option value="">Select Dimension</option>';
+
+            if (materialType && materialConfig[materialType]) {
+                const config = materialConfig[materialType];
+                config.types.forEach(type => {
+                    typeSelect.innerHTML += `<option value="${type}">${type}</option>`;
+                });
+                config.thicknesses.forEach(thickness => {
+                    thicknessSelect.innerHTML += `<option value="${thickness}">${thickness} mm</option>`;
+                });
+                config.dimensions.forEach(dimension => {
+                    dimensionSelect.innerHTML += `<option value="${dimension}">${dimension}</option>`;
+                });
+                framedOptions.style.display = config.supportsPlies ? 'block' : 'none';
+            }
+        }
+
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const toggle = section.previousElementSibling;
+            section.classList.toggle('visible');
+            toggle.classList.toggle('active');
+        }
+
+        function calculateResults(event) {
+            event.preventDefault();
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = '';
+
+            const length = parseFloat(document.getElementById('length').value) || 0;
+            const height = parseFloat(document.getElementById('height').value) || 0;
+            const doorArea = parseFloat(document.getElementById('doorArea').value) || 0;
+            const windowArea = parseFloat(document.getElementById('windowArea').value) || 0;
+            const wallArea = (length * height) - (doorArea + windowArea);
+
+            if (wallArea <= 0) {
+                displayError('Wall area must be greater than zero. Please check your inputs.');
+                return;
+            }
+
+            let totalProductivityRate = 0;
+            const materials = [];
+            for (let i = 1; i <= materialCount; i++) {
+                const materialType = document.getElementById(`materialType-${i}`)?.value;
+                if (materialType && materialConfig[materialType]) {
+                    const config = materialConfig[materialType];
+                    const wasteFactor = parseFloat(document.getElementById(`wasteFactor-${i}`).value) / 100 || 0;
+                    const costPerUnit = parseFloat(document.getElementById(`materialCost-${i}`).value) || 0;
+                    const plies = config.supportsPlies ? parseInt(document.getElementById(`plies-${i}`).value) || 1 : 1;
+
+                    const quantity = Math.ceil(wallArea / config.unitArea) * (1 + wasteFactor) * plies;
+                    materials.push({ type: config.name, quantity, costPerUnit, totalCost: quantity * costPerUnit, productivityRate: config.productivityRate });
+                    totalProductivityRate += config.productivityRate / materialCount;
+                }
+            }
+
+            const currency = document.getElementById('currency').value || 'PHP';
+            const currencySymbol = { 'PHP': '₱', 'USD': '$', 'EUR': '€', 'JPY': '¥' }[currency] || '₱';
+
+            // Update results UI
+            document.getElementById('wallLengthResult').textContent = `${length} m`;
+            document.getElementById('wallHeightResult').textContent = `${height} m`;
+            document.getElementById('doorAreaResult').textContent = `${doorArea} m²`;
+            document.getElementById('windowAreaResult').textContent = `${windowArea} m²`;
+            document.getElementById('wallArea').textContent = `${wallArea.toFixed(2)} m²`;
+
+            let materialResultsHtml = '<ul>';
+            let totalMaterialCost = 0;
+            materials.forEach((mat, idx) => {
+                materialResultsHtml += `<li>${mat.type}: ${mat.quantity.toFixed(2)} ${materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === mat.type)].unit} (Cost: ${currencySymbol}${mat.totalCost.toFixed(2)})</li>`;
+                totalMaterialCost += mat.totalCost;
+            });
+            materialResultsHtml += '</ul>';
+            document.getElementById('materialResults').innerHTML = materialResultsHtml;
+            document.getElementById('materialCostResult').textContent = totalMaterialCost.toFixed(2);
+            document.getElementById('materialCostSqm').textContent = (totalMaterialCost / wallArea).toFixed(2);
+            document.getElementById('currencySymbolMaterial').textContent = currencySymbol;
+            document.getElementById('currencySymbolMaterialSqm').textContent = currencySymbol;
+
+                        // Accessory calculations
             const studCost = parseFloat(document.getElementById('studCost').value) || 0;
             const trackCost = parseFloat(document.getElementById('trackCost').value) || 0;
             const screwCost = parseFloat(document.getElementById('screwCost').value) || 0;
@@ -1014,457 +814,209 @@
             const sealantCost = parseFloat(document.getElementById('sealantCost').value) || 0;
             const rebarCost = parseFloat(document.getElementById('rebarCost').value) || 0;
             const connectorCost = parseFloat(document.getElementById('connectorCost').value) || 0;
-            const mortarCementCost = parseFloat(document.getElementById('mortarCementCost').value) || 0;
-            const mortarSandCost = parseFloat(document.getElementById('mortarSandCost').value) || 0;
-            const mortarWaterCost = parseFloat(document.getElementById('mortarWaterCost').value) || 0;
+
+            let totalAccessoryCost = 0;
+            let accessoryResultsHtml = '<ul>';
+            materials.forEach((mat) => {
+                const config = materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === mat.type)];
+                if (config.accessories.studs) {
+                    const studQty = Math.ceil(length / 0.6) * height * (config.supportsPlies ? parseInt(document.getElementById(`plies-${materials.indexOf(mat) + 1}`).value) || 1 : 1);
+                    const studTotal = studQty * studCost;
+                    accessoryResultsHtml += `<li>Studs: ${studQty.toFixed(2)} m (Cost: ${currencySymbol}${studTotal.toFixed(2)})</li>`;
+                    totalAccessoryCost += studTotal;
+                }
+                if (config.accessories.tracks) {
+                    const trackQty = 2 * length * (config.supportsPlies ? parseInt(document.getElementById(`plies-${materials.indexOf(mat) + 1}`).value) || 1 : 1);
+                    const trackTotal = trackQty * trackCost;
+                    accessoryResultsHtml += `<li>Tracks: ${trackQty.toFixed(2)} m (Cost: ${currencySymbol}${trackTotal.toFixed(2)})</li>`;
+                    totalAccessoryCost += trackTotal;
+                }
+                if (config.accessories.screws) {
+                    const screwQty = Math.ceil(wallArea * 25) * (config.supportsPlies ? parseInt(document.getElementById(`plies-${materials.indexOf(mat) + 1}`).value) || 1 : 1);
+                    const screwTotal = screwQty * screwCost;
+                    accessoryResultsHtml += `<li>Screws: ${screwQty.toFixed(2)} pieces (Cost: ${currencySymbol}${screwTotal.toFixed(2)})</li>`;
+                    totalAccessoryCost += screwTotal;
+                }
+                if (config.accessories.jointCompound) {
+                    const jointCompoundQty = wallArea * 0.5 * (config.supportsPlies ? parseInt(document.getElementById(`plies-${materials.indexOf(mat) + 1}`).value) || 1 : 1);
+                    const jointCompoundTotal = jointCompoundQty * jointCompoundCost;
+                    accessoryResultsHtml += `<li>Joint Compound: ${jointCompoundQty.toFixed(2)} kg (Cost: ${currencySymbol}${jointCompoundTotal.toFixed(2)})</li>`;
+                    totalAccessoryCost += jointCompoundTotal;
+                }
+                if (config.accessories.sealants) {
+                    const sealantQty = length * 0.1;
+                    const sealantTotal = sealantQty * sealantCost;
+                    accessoryResultsHtml += `<li>Sealant: ${sealantQty.toFixed(2)} tubes (Cost: ${currencySymbol}${sealantTotal.toFixed(2)})</li>`;
+                    totalAccessoryCost += sealantTotal;
+                }
+                if (config.accessories.rebars) {
+                    const rebarQty = wallArea * 0.1;
+                    const rebarTotal = rebarQty * rebarCost;
+                    accessoryResultsHtml += `<li>Rebar: ${rebarQty.toFixed(2)} m (Cost: ${currencySymbol}${rebarTotal.toFixed(2)})</li>`;
+                    totalAccessoryCost += rebarTotal;
+                }
+                if (config.accessories.connectors) {
+                    const connectorQty = Math.ceil(wallArea / 2);
+                    const connectorTotal = connectorQty * connectorCost;
+                    accessoryResultsHtml += `<li>Connectors: ${connectorQty.toFixed(2)} pieces (Cost: ${currencySymbol}${connectorTotal.toFixed(2)})</li>`;
+                    totalAccessoryCost += connectorTotal;
+                }
+            });
+            accessoryResultsHtml += '</ul>';
+            document.getElementById('accessoryResults').innerHTML = accessoryResultsHtml;
+            document.getElementById('accessoryCostResult').textContent = totalAccessoryCost.toFixed(2);
+            document.getElementById('accessoryCostSqm').textContent = (totalAccessoryCost / wallArea).toFixed(2);
+            document.getElementById('currencySymbolAccessory').textContent = currencySymbol;
+            document.getElementById('currencySymbolAccessorySqm').textContent = currencySymbol;
+
+            // Plastering calculations
+            const plasterSide1 = document.getElementById('plasterSide1').checked;
+            const plasterSide2 = document.getElementById('plasterSide2').checked;
+            const plasterThickness = parseFloat(document.getElementById('plasterThickness').value) || 10;
             const plasterCementCost = parseFloat(document.getElementById('plasterCementCost').value) || 0;
             const plasterSandCost = parseFloat(document.getElementById('plasterSandCost').value) || 0;
             const plasterWaterCost = parseFloat(document.getElementById('plasterWaterCost').value) || 0;
-            const laborCostPerSqM = parseFloat(document.getElementById('laborCost').value) || 0;
-            const numberOfLaborers = parseInt(document.getElementById('laborers').value) || 1;
-            const contingencyPercent = parseFloat(document.getElementById('contingency').value) / 100 || 0;
-            const prepTime = parseFloat(prepTimeInput.value) || 0.5;
-            const cleanupTime = parseFloat(cleanupTimeInput.value) || 0.5;
-            const overheadPercent = parseFloat(overheadPercentInput.value) / 100 || 0;
-            const equipmentPercent = parseFloat(equipmentPercentInput.value) / 100 || 0;
-            const profitMargin = parseFloat(profitMarginInput.value) / 100 || 0;
 
-            // Validation checks
-            if (wallLength <= 0 || wallHeight <= 0 || wallLength + wallHeight <= 0.01) {
-                displayError('Please enter valid wall dimensions (greater than 0).');
-                return;
-            }
-            if (doorArea < 0 || windowArea < 0) {
-                displayError('Door and window areas cannot be negative.');
-                return;
-            }
-            if (prepTime < 0 || cleanupTime < 0) {
-                displayError('Preparation and cleanup times cannot be negative.');
-                return;
-            }
-            if (overheadPercent < 0 || equipmentPercent < 0 || profitMargin < 0 || overheadPercent > 1 || equipmentPercent > 1 || profitMargin > 1) {
-                displayError('Overhead, equipment, and profit percentages must be between 0 and 100%.');
-                return;
-            }
-            if (studCost < 0 || trackCost < 0 || screwCost < 0 || jointCompoundCost < 0 || sealantCost < 0 || rebarCost < 0 || connectorCost < 0 || mortarCementCost < 0 || mortarSandCost < 0 || mortarWaterCost < 0 || plasterCementCost < 0 || plasterSandCost < 0 || plasterWaterCost < 0 || laborCostPerSqM < 0) {
-                displayError('Costs cannot be negative.');
-                return;
-            }
-
-            const wallArea = (wallLength * wallHeight) - (doorArea + windowArea);
-            if (wallArea <= 0) {
-                displayError('Wall area cannot be zero or negative after subtracting openings.');
-                return;
-            }
-
-            let totalMaterialCost = 0;
-            let totalAccessoryCost = 0;
             let totalPlasteringCost = 0;
-            let totalPlies = 0;
-            let totalProductivityRate = 0;
-            let mainMaterialResults = {};
-            let accessoryResults = {};
-            let plasteringResults = {};
-            const materialCards = document.querySelectorAll('.material-card');
+            let plasteringResultsHtml = '<ul>';
+            if ((plasterSide1 || plasterSide2) && materials.some(mat => materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === mat.type)].needsPlastering)) {
+                const plasterArea = wallArea * (plasterSide1 ? 1 : 0) + (plasterSide2 ? 1 : 0);
+                const mortarVolume = plasterArea * (plasterThickness / 1000); // Convert mm to m
+                const cementBags = Math.ceil(mortarVolume * 0.25 / 0.025 * 1.05); // 5% waste factor
+                const sandTons = mortarVolume * 0.75 * 1.6 * 1.05; // 5% waste factor
+                const waterVolume = mortarVolume * 0.5;
 
-            if (materialCards.length === 0) {
-                displayError('Please add at least one material layer.');
-                return;
+                const cementTotal = cementBags * plasterCementCost;
+                const sandTotal = sandTons * plasterSandCost;
+                const waterTotal = waterVolume * plasterWaterCost;
+                totalPlasteringCost = cementTotal + sandTotal + waterTotal;
+
+                plasteringResultsHtml += `<li>Cement Bags: ${cementBags} (Cost: ${currencySymbol}${cementTotal.toFixed(2)})</li>`;
+                plasteringResultsHtml += `<li>Sand: ${sandTons.toFixed(2)} tons (Cost: ${currencySymbol}${sandTotal.toFixed(2)})</li>`;
+                plasteringResultsHtml += `<li>Water: ${waterVolume.toFixed(2)} m³ (Cost: ${currencySymbol}${waterTotal.toFixed(2)})</li>`;
             }
+            plasteringResultsHtml += '</ul>';
+            document.getElementById('plasteringResults').innerHTML = plasteringResultsHtml;
+            document.getElementById('plasteringCostResult').textContent = totalPlasteringCost.toFixed(2);
+            document.getElementById('plasteringCostSqm').textContent = (totalPlasteringCost / wallArea).toFixed(2);
+            document.getElementById('currencySymbolPlaster').textContent = currencySymbol;
+            document.getElementById('currencySymbolPlasterSqm').textContent = currencySymbol;
+            document.getElementById('plasteringCostRow').style.display = totalPlasteringCost > 0 ? 'table-row' : 'none';
 
-            let validMaterials = true;
-            materialCards.forEach(card => {
-                const id = card.id.split('-')[2];
-                const materialType = document.getElementById(`materialType${id}`).value;
-                const materialCost = parseFloat(document.getElementById(`materialCost${id}`).value);
-                const wasteFactor = parseFloat(document.getElementById(`wasteFactor${id}`).value) / 100 || 0;
-                const config = materialConfig[materialType];
-                const side1 = config.isFramedWall ? document.getElementById(`side1${id}`).checked : true;
-                const side2 = config.isFramedWall ? document.getElementById(`side2${id}`).checked : false;
-                const pliesSide1 = config.isFramedWall && side1 ? parseInt(document.getElementById(`pliesSide1${id}`).value) || 1 : 1;
-                const pliesSide2 = config.isFramedWall && side2 ? parseInt(document.getElementById(`pliesSide2${id}`).value) || 1 : 1;
+            // Labor calculations
+            const laborCostPerSqm = parseFloat(document.getElementById('laborCost').value) || 0;
+            const numLaborers = parseInt(document.getElementById('laborers').value) || 1;
+            const prepTime = parseFloat(document.getElementById('prepTime').value) || 0;
+            const cleanupTime = parseFloat(document.getElementById('cleanupTime').value) || 0;
+            const contingencyPercent = parseFloat(document.getElementById('contingency').value) / 100 || 0;
+            const overheadPercent = parseFloat(document.getElementById('overheadPercent').value) / 100 || 0;
+            const equipmentPercent = parseFloat(document.getElementById('equipmentPercent').value) / 100 || 0;
+            const profitMarginPercent = parseFloat(document.getElementById('profitMargin').value) / 100 || 0;
 
-                if (materialCost < 0 || wasteFactor < 0 || wasteFactor > 1) {
-                    displayError(`Invalid input for ${config.name}: cost or waste factor must be non-negative and waste factor below 100%.`);
-                    validMaterials = false;
-                    return;
-                }
+            const laborCostTotal = wallArea * laborCostPerSqm;
+            const installTime = wallArea / totalProductivityRate;
+            const totalDays = (prepTime + installTime + cleanupTime) / numLaborers;
 
-                const unitArea = config.unitArea;
-                let materialQuantity = 0;
-                if (side1) materialQuantity += Math.ceil((wallArea / unitArea) * pliesSide1);
-                if (side2) materialQuantity += Math.ceil((wallArea / unitArea) * pliesSide2);
-                materialQuantity = Math.ceil(materialQuantity * (1 + wasteFactor));
-                const currentMaterialCost = materialQuantity * materialCost;
-                totalMaterialCost += currentMaterialCost;
+            document.getElementById('laborersResult').textContent = numLaborers;
+            document.getElementById('productivityRate').textContent = `${totalProductivityRate.toFixed(2)} m²/day`;
+            document.getElementById('prepTimeResult').textContent = `${prepTime.toFixed(2)} days`;
+            document.getElementById('installTime').textContent = `${installTime.toFixed(2)} days`;
+            document.getElementById('cleanupTimeResult').textContent = `${cleanupTime.toFixed(2)} days`;
+            document.getElementById('totalDays').textContent = `${totalDays.toFixed(2)} days`;
 
-                if (!mainMaterialResults[config.name]) mainMaterialResults[config.name] = { quantity: 0, cost: 0, unit: config.unit };
-                mainMaterialResults[config.name].quantity += materialQuantity;
-                mainMaterialResults[config.name].cost += currentMaterialCost;
+            document.getElementById('laborCostResult').textContent = laborCostTotal.toFixed(2);
+            document.getElementById('laborCostSqm').textContent = laborCostPerSqm.toFixed(2);
+            document.getElementById('currencySymbolLabor').textContent = currencySymbol;
+            document.getElementById('currencySymbolLaborSqm').textContent = currencySymbol;
 
-                if (config.isFramedWall) totalPlies += (side1 ? pliesSide1 : 0) + (side2 ? pliesSide2 : 0);
-                if (config.productivityRate) totalProductivityRate += config.productivityRate * ((side1 ? pliesSide1 : 0) + (side2 ? pliesSide2 : 0));
+            // Contingency, Overhead, Equipment, and Profit calculations
+            const baseCost = totalMaterialCost + totalAccessoryCost + totalPlasteringCost + laborCostTotal;
+            const contingencyCost = baseCost * contingencyPercent;
+            const overheadCost = baseCost * overheadPercent;
+            const equipmentCost = baseCost * equipmentPercent;
+            const profitCost = (baseCost + contingencyCost + overheadCost + equipmentCost) * profitMarginPercent;
+            const totalCost = baseCost + contingencyCost + overheadCost + equipmentCost + profitCost;
 
-                if (config.accessories.connectors) {
-                    const connectors = Math.ceil(wallArea / 2);
-                    accessoryResults['Connectors'] = { quantity: connectors, cost: connectors * connectorCost, unit: 'pieces' };
-                    totalAccessoryCost += connectors * connectorCost;
-                }
-                if (config.accessories.sealants) {
-                    const sealant = wallLength * 0.1;
-                    accessoryResults['Sealant'] = { quantity: sealant, cost: sealant * sealantCost, unit: 'tubes' };
-                    totalAccessoryCost += sealant * sealantCost;
-                }
-            });
+            document.getElementById('contingencyCostResult').textContent = contingencyCost.toFixed(2);
+            document.getElementById('contingencyCostSqm').textContent = (contingencyCost / wallArea).toFixed(2);
+            document.getElementById('currencySymbolContingency').textContent = currencySymbol;
+            document.getElementById('currencySymbolContingencySqm').textContent = currencySymbol;
+            document.getElementById('contingencyCostRow').style.display = contingencyCost > 0 ? 'table-row' : 'none';
 
-            if (!validMaterials) return;
+            document.getElementById('overheadCostResult').textContent = overheadCost.toFixed(2);
+            document.getElementById('overheadCostSqm').textContent = (overheadCost / wallArea).toFixed(2);
+            document.getElementById('currencySymbolOverhead').textContent = currencySymbol;
+            document.getElementById('currencySymbolOverheadSqm').textContent = currencySymbol;
 
-            const totalFramedWallPlies = totalPlies;
-            if (totalFramedWallPlies > 0) {
-                const studs = Math.ceil((wallLength / 0.6) * wallHeight * totalFramedWallPlies);
-                const tracks = Math.ceil(2 * wallLength * totalFramedWallPlies);
-                const screws = Math.ceil(wallArea * 25 * totalFramedWallPlies);
-                const jointCompound = wallArea * 0.5 * totalFramedWallPlies;
+            document.getElementById('equipmentCostResult').textContent = equipmentCost.toFixed(2);
+            document.getElementById('equipmentCostSqm').textContent = (equipmentCost / wallArea).toFixed(2);
+            document.getElementById('currencySymbolEquipment').textContent = currencySymbol;
+            document.getElementById('currencySymbolEquipmentSqm').textContent = currencySymbol;
 
-                accessoryResults['Studs'] = { quantity: studs, cost: studs * studCost, unit: 'm' };
-                accessoryResults['Tracks'] = { quantity: tracks, cost: tracks * trackCost, unit: 'm' };
-                accessoryResults['Screws'] = { quantity: screws, cost: screws * screwCost, unit: 'pieces' };
-                accessoryResults['Joint Compound'] = { quantity: jointCompound, cost: jointCompound * jointCompoundCost, unit: 'kg' };
-                totalAccessoryCost += (studs * studCost) + (tracks * trackCost) + (screws * screwCost) + (jointCompound * jointCompoundCost);
-            }
+            document.getElementById('profitCostResult').textContent = profitCost.toFixed(2);
+            document.getElementById('profitCostSqm').textContent = (profitCost / wallArea).toFixed(2);
+            document.getElementById('currencySymbolProfit').textContent = currencySymbol;
+            document.getElementById('currencySymbolProfitSqm').textContent = currencySymbol;
 
-            const isMasonry = Array.from(materialCards).some(card => {
-                const materialType = document.getElementById(`materialType${card.id.split('-')[2]}`).value;
-                return materialType === 'chb' || materialType === 'aac';
-            });
-            if (isMasonry) {
-                const mortarVolume = wallArea * 0.01;
-                const mortarCementBags = Math.ceil((mortarVolume * 0.25) / 0.025 * (1 + (document.getElementById(`wasteFactor${materialCount}`).value / 100 || 0.1)));
-                const mortarSandCubicMeters = mortarVolume * 0.75 * (1 + (document.getElementById(`wasteFactor${materialCount}`).value / 100 || 0.1));
-                               const mortarWater = mortarVolume * 0.5;
-                const rebarLength = wallArea * 0.1; // 10% coverage
+            document.getElementById('totalCost').textContent = totalCost.toFixed(2);
+            document.getElementById('totalCostSqm').textContent = (totalCost / wallArea).toFixed(2);
+            document.getElementById('currencySymbolTotal').textContent = currencySymbol;
+            document.getElementById('currencySymbolTotalSqm').textContent = currencySymbol;
 
-                accessoryResults['Mortar Cement'] = { quantity: mortarCementBags, cost: mortarCementBags * mortarCementCost, unit: 'bags' };
-                accessoryResults['Mortar Sand'] = { quantity: mortarSandCubicMeters, cost: mortarSandCubicMeters * mortarSandCost, unit: 'm³' };
-                accessoryResults['Mortar Water'] = { quantity: mortarWater, cost: mortarWater * mortarWaterCost, unit: 'm³' };
-                accessoryResults['Rebar'] = { quantity: rebarLength, cost: rebarLength * rebarCost, unit: 'm' };
-
-                totalAccessoryCost += (mortarCementBags * mortarCementCost) + (mortarSandCubicMeters * mortarSandCost) + (mortarWater * mortarWaterCost) + (rebarLength * rebarCost);
-            }
-
-            let plasteringArea = 0;
-            if (plasterSide1) plasteringArea += wallArea;
-            if (plasterSide2) plasteringArea += wallArea;
-
-            if (plasteringArea > 0 && !isNaN(plasterThickness)) {
-                const plasterVolume = plasteringArea * (plasterThickness / 1000);
-                const plasterCementBags = Math.ceil((plasterVolume * 0.25) / 0.025);
-                const plasterSandCubicMeters = plasterVolume * 0.75;
-                const plasterWater = plasterVolume * 0.5;
-
-                plasteringResults['Plaster Cement'] = { quantity: plasterCementBags, cost: plasterCementBags * plasterCementCost, unit: 'bags' };
-                plasteringResults['Plaster Sand'] = { quantity: plasterSandCubicMeters, cost: plasterSandCubicMeters * plasterSandCost, unit: 'm³' };
-                plasteringResults['Plaster Water'] = { quantity: plasterWater, cost: plasterWater * plasterWaterCost, unit: 'm³' };
-
-                totalPlasteringCost = (plasterCementBags * plasterCementCost) + (plasterSandCubicMeters * plasterSandCost) + (plasterWater * plasterWaterCost);
-            }
-
-            const laborCost = wallArea * laborCostPerSqM;
-            const baseProjectCost = totalMaterialCost + totalAccessoryCost + totalPlasteringCost + laborCost;
-            const contingencyCost = baseProjectCost * contingencyPercent;
-            const overheadCost = baseProjectCost * overheadPercent;
-            const equipmentCost = baseProjectCost * equipmentPercent;
-            const profitCost = (baseProjectCost + contingencyCost + overheadCost + equipmentCost) * profitMargin;
-            const grandTotalCost = baseProjectCost + contingencyCost + overheadCost + equipmentCost + profitCost;
-
-            const installationDays = totalProductivityRate > 0 ? (wallArea / totalProductivityRate) : 0;
-            const totalDays = (prepTime + installationDays + cleanupTime) / numberOfLaborers;
-
-            window.resultsData = {
-                projectName: document.getElementById('projectName').value,
-                projectLocation: document.getElementById('projectLocation').value,
-                clientName: document.getElementById('clientName').value,
-                companyName: document.getElementById('companyName').value,
-                date: document.getElementById('date').value,
-                preparedBy: document.getElementById('preparedBy').value,
-                wallLength: wallLength,
-                wallHeight: wallHeight,
-                wallArea: wallArea,
-                doorArea: doorArea,
-                windowArea: windowArea,
-                plasterSide1: plasterSide1,
-                plasterSide2: plasterSide2,
-                plasterThickness: plasterThickness,
-                currency: currency,
-                currencySymbol: getCurrencySymbol(currency),
-                materials: mainMaterialResults,
-                accessories: accessoryResults,
-                plastering: plasteringResults,
-                laborCost: laborCost,
-                contingency: contingencyCost,
-                overhead: overheadCost,
-                equipment: equipmentCost,
-                profit: profitCost,
-                totalCost: grandTotalCost,
-                laborers: numberOfLaborers,
-                productivityRate: totalProductivityRate.toFixed(2),
-                prepTime: prepTime,
-                installTime: installationDays.toFixed(2),
-                cleanupTime: cleanupTime,
-                totalDays: totalDays.toFixed(2),
-                materialCost: totalMaterialCost,
-                accessoryCost: totalAccessoryCost,
-                plasteringCost: totalPlasteringCost
-            };
-
-            console.log('Global resultsData set:', window.resultsData);
-            displayResults();
+            document.getElementById('results').style.display = 'block';
+            resultsData = { materials, accessories: { total: totalAccessoryCost }, plastering: { total: totalPlasteringCost }, labor: { total: laborCostTotal }, costs: { total: totalCost } };
         }
 
-        function displayResults() {
-            console.log('Displaying results');
-            if (!window.resultsData) {
-                console.error('resultsData is not defined');
-                return;
-            }
-
-            const resultsData = window.resultsData;
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.style.display = 'block';
-            document.getElementById('message').className = 'success';
-            document.getElementById('message').textContent = 'Calculation successful!';
-
-            document.getElementById('wallLengthResult').textContent = `${resultsData.wallLength.toFixed(2)} m`;
-            document.getElementById('wallHeightResult').textContent = `${resultsData.wallHeight.toFixed(2)} m`;
-            document.getElementById('doorAreaResult').textContent = `${resultsData.doorArea.toFixed(2)} m²`;
-            document.getElementById('windowAreaResult').textContent = `${resultsData.windowArea.toFixed(2)} m²`;
-            document.getElementById('wallArea').textContent = `${resultsData.wallArea.toFixed(2)} m²`;
-
-            document.getElementById('laborersResult').textContent = resultsData.laborers;
-            document.getElementById('productivityRate').textContent = `${resultsData.productivityRate} m²/day`;
-            document.getElementById('prepTimeResult').textContent = `${resultsData.prepTime} days`;
-            document.getElementById('installTime').textContent = `${resultsData.installTime} days`;
-            document.getElementById('cleanupTimeResult').textContent = `${resultsData.cleanupTime} days`;
-            document.getElementById('totalDays').textContent = `${resultsData.totalDays} days`;
-
-            const currencySymbol = resultsData.currencySymbol;
-            const wallArea = resultsData.wallArea;
-
-            document.getElementById('currencySymbolMaterial').textContent = currencySymbol;
-            document.getElementById('materialCostResult').textContent = resultsData.materialCost.toFixed(2);
-            document.getElementById('currencySymbolMaterialSqm').textContent = currencySymbol;
-            document.getElementById('materialCostSqm').textContent = wallArea > 0 ? (resultsData.materialCost / wallArea).toFixed(2) : '0.00';
-
-            document.getElementById('currencySymbolAccessory').textContent = currencySymbol;
-            document.getElementById('accessoryCostResult').textContent = resultsData.accessoryCost.toFixed(2);
-            document.getElementById('currencySymbolAccessorySqm').textContent = currencySymbol;
-            document.getElementById('accessoryCostSqm').textContent = wallArea > 0 ? (resultsData.accessoryCost / wallArea).toFixed(2) : '0.00';
-
-            document.getElementById('currencySymbolPlaster').textContent = currencySymbol;
-            document.getElementById('plasteringCostResult').textContent = resultsData.plasteringCost.toFixed(2);
-            document.getElementById('currencySymbolPlasterSqm').textContent = currencySymbol;
-            document.getElementById('plasteringCostSqm').textContent = wallArea > 0 ? (resultsData.plasteringCost / wallArea).toFixed(2) : '0.00';
-
-            document.getElementById('currencySymbolLabor').textContent = currencySymbol;
-            document.getElementById('laborCostResult').textContent = resultsData.laborCost.toFixed(2);
-            document.getElementById('currencySymbolLaborSqm').textContent = currencySymbol;
-            document.getElementById('laborCostSqm').textContent = wallArea > 0 ? (resultsData.laborCost / wallArea).toFixed(2) : '0.00';
-
-            document.getElementById('currencySymbolContingency').textContent = currencySymbol;
-            document.getElementById('contingencyCostResult').textContent = resultsData.contingency.toFixed(2);
-            document.getElementById('currencySymbolContingencySqm').textContent = currencySymbol;
-            document.getElementById('contingencyCostSqm').textContent = wallArea > 0 ? (resultsData.contingency / wallArea).toFixed(2) : '0.00';
-
-            document.getElementById('currencySymbolOverhead').textContent = currencySymbol;
-            document.getElementById('overheadCostResult').textContent = resultsData.overhead.toFixed(2);
-            document.getElementById('currencySymbolOverheadSqm').textContent = currencySymbol;
-            document.getElementById('overheadCostSqm').textContent = wallArea > 0 ? (resultsData.overhead / wallArea).toFixed(2) : '0.00';
-
-            document.getElementById('currencySymbolEquipment').textContent = currencySymbol;
-            document.getElementById('equipmentCostResult').textContent = resultsData.equipment.toFixed(2);
-            document.getElementById('currencySymbolEquipmentSqm').textContent = currencySymbol;
-            document.getElementById('equipmentCostSqm').textContent = wallArea > 0 ? (resultsData.equipment / wallArea).toFixed(2) : '0.00';
-
-            document.getElementById('currencySymbolProfit').textContent = currencySymbol;
-            document.getElementById('profitCostResult').textContent = resultsData.profit.toFixed(2);
-            document.getElementById('currencySymbolProfitSqm').textContent = currencySymbol;
-            document.getElementById('profitCostSqm').textContent = wallArea > 0 ? (resultsData.profit / wallArea).toFixed(2) : '0.00';
-
-            document.getElementById('currencySymbolTotal').textContent = currencySymbol;
-            document.getElementById('totalCost').textContent = resultsData.totalCost.toFixed(2);
-            document.getElementById('currencySymbolTotalSqm').textContent = currencySymbol;
-            document.getElementById('totalCostSqm').textContent = wallArea > 0 ? (resultsData.totalCost / wallArea).toFixed(2) : '0.00';
-
-            const materialResultsDiv = document.getElementById('materialResults');
-            materialResultsDiv.innerHTML = '';
-            for (const [name, data] of Object.entries(resultsData.materials)) {
-                materialResultsDiv.innerHTML += `
-                    <p><strong>${name} Quantity:</strong> <span class="value">${data.quantity} ${data.unit}</span></p>
-                    <p><strong>${name} Cost:</strong> <span class="value">${currencySymbol}${data.cost.toFixed(2)}</span></p>
-                `;
-            }
-
-            const accessoryResultsDiv = document.getElementById('accessoryResults');
-            accessoryResultsDiv.innerHTML = '';
-            for (const [name, data] of Object.entries(resultsData.accessories)) {
-                accessoryResultsDiv.innerHTML += `
-                    <p><strong>${name} Quantity:</strong> <span class="value">${data.quantity.toFixed(2)} ${data.unit}</span></p>
-                    <p><strong>${name} Cost:</strong> <span class="value">${currencySymbol}${data.cost.toFixed(2)}</span></p>
-                `;
-            }
-
-            const plasteringResultsDiv = document.getElementById('plasteringResults');
-            plasteringResultsDiv.innerHTML = '';
-            if (Object.keys(resultsData.plastering).length > 0) {
-                document.getElementById('plasteringResultsContainer').style.display = 'block';
-                for (const [name, data] of Object.entries(resultsData.plastering)) {
-                    plasteringResultsDiv.innerHTML += `
-                        <p><strong>${name} Quantity:</strong> <span class="value">${data.quantity.toFixed(2)} ${data.unit}</span></p>
-                        <p><strong>${name} Cost:</strong> <span class="value">${currencySymbol}${data.cost.toFixed(2)}</span></p>
-                    `;
-                }
-            } else {
-                document.getElementById('plasteringResultsContainer').style.display = 'none';
-            }
+        function displayError(message) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.innerHTML = `<div class="error">${message}</div>`;
+            document.getElementById('results').style.display = 'block';
         }
 
         function downloadPDF() {
-            console.log('Download PDF button clicked');
-            if (!window.resultsData) {
-                alert("Please calculate the results first.");
+            if (!resultsData) {
+                displayError('No results to download. Please calculate first.');
                 return;
             }
 
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            doc.setFont('Arial', 'bold');
+            doc.setFontSize(16);
+            doc.text('Wall Materials Calculator Results', 10, 10);
+
+            let y = 20;
             doc.setFontSize(12);
-            doc.text("Wall Materials Calculation Summary", 14, 22);
+            doc.text(`Project Name: ${document.getElementById('projectName').value}`, 10, y += 10);
+            doc.text(`Project Location: ${document.getElementById('projectLocation').value}`, 10, y += 10);
+            doc.text(`Client: ${document.getElementById('clientName').value}`, 10, y += 10);
+            doc.text(`Company: ${document.getElementById('companyName').value}`, 10, y += 10);
+            doc.text(`Date: ${document.getElementById('date').value}`, 10, y += 10);
+            doc.text(`Prepared By: ${document.getElementById('preparedBy').value}`, 10, y += 10);
+            doc.text(`Wall Area: ${document.getElementById('wallArea').textContent}`, 10, y += 10);
 
-            const projectInfoData = getProjectInfoData();
-            const wallParametersData = getWallParametersData();
-            const materialData = getMaterialTableData();
-            const accessoryData = getAccessoryTableData();
-            const costSummaryData = getCostSummaryData();
-
-            doc.autoTable({
-                startY: 30,
-                head: [[{ content: 'Project Information', colSpan: 2, styles: { fontStyle: 'bold', halign: 'center', font: 'Arial', fontSize: 10 } }],
-                body: projectInfoData,
-                theme: 'plain',
-                styles: { font: 'Arial', fontSize: 10, cellPadding: 2 },
-                headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
-                columnStyles: { 0: { fontStyle: 'bold', minWidth: 50 } }
+            y += 10;
+            doc.text('Materials:', 10, y += 10);
+            resultsData.materials.forEach((mat, idx) => {
+                doc.text(`${idx + 1}. ${mat.type}: ${mat.quantity.toFixed(2)} units (Cost: ${currencySymbol}${mat.totalCost.toFixed(2)})`, 10, y += 10);
             });
 
-            doc.autoTable({
-                startY: doc.autoTable.previous.finalY + 10,
-                head: [[{ content: 'Wall Parameters', colSpan: 2, styles: { fontStyle: 'bold', halign: 'center', font: 'Arial', fontSize: 10 } }],
-                body: wallParametersData,
-                theme: 'plain',
-                styles: { font: 'Arial', fontSize: 10, cellPadding: 2 },
-                headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
-                columnStyles: { 0: { fontStyle: 'bold', minWidth: 50 } }
-            });
+            y += 10;
+            doc.text('Accessories:', 10, y += 10);
+            doc.text(`Total Cost: ${currencySymbol}${resultsData.accessories.total.toFixed(2)}`, 10, y += 10);
 
-            if (materialData.length > 0) {
-                doc.autoTable({
-                    startY: doc.autoTable.previous.finalY + 10,
-                    head: [[{ content: 'Material Layers', colSpan: 3, styles: { fontStyle: 'bold', halign: 'center', font: 'Arial', fontSize: 10 } }],
-                    body: materialData,
-                    theme: 'plain',
-                    styles: { font: 'Arial', fontSize: 10, cellPadding: 2 },
-                    headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
-                    columnStyles: { 0: { fontStyle: 'bold', minWidth: 50 } }
-                });
-            }
+            y += 10;
+            doc.text('Plastering:', 10, y += 10);
+            doc.text(`Total Cost: ${currencySymbol}${resultsData.plastering.total.toFixed(2)}`, 10, y += 10);
 
-            if (accessoryData.length > 0) {
-                doc.autoTable({
-                    startY: doc.autoTable.previous.finalY + 10,
-                    head: [[{ content: 'Accessory Materials', colSpan: 3, styles: { fontStyle: 'bold', halign: 'center', font: 'Arial', fontSize: 10 } }],
-                    body: accessoryData,
-                    theme: 'plain',
-                    styles: { font: 'Arial', fontSize: 10, cellPadding: 2 },
-                    headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
-                    columnStyles: { 0: { fontStyle: 'bold', minWidth: 50 } }
-                });
-            }
+            y += 10;
+            doc.text('Labor:', 10, y += 10);
+            doc.text(`Total Cost: ${currencySymbol}${resultsData.labor.total.toFixed(2)}`, 10, y += 10);
 
-            doc.autoTable({
-                startY: doc.autoTable.previous.finalY + 10,
-                head: [[{ content: 'Cost Summary', colSpan: 3, styles: { fontStyle: 'bold', halign: 'center', font: 'Arial', fontSize: 10 } }],
-                body: costSummaryData,
-                theme: 'plain',
-                headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
-                styles: { font: 'Arial', fontSize: 10, cellPadding: 2 }
-            });
+            y += 10;
+            doc.text('Total Cost:', 10, y += 10);
+            doc.text(`${currencySymbol}${resultsData.costs.total.toFixed(2)}`, 10, y += 10);
 
-            doc.save("Wall Materials Calculation_Summary.pdf");
-        }
-
-        function getProjectInfoData() {
-            const { projectName, projectLocation, clientName, date, preparedBy } = window.resultsData;
-            return [
-                ['Project Name:', projectName || 'N/A'],
-                ['Project Location:', projectLocation || 'N/A'],
-                ['Client Name:', clientName || 'N/A'],
-                ['Date:', date || 'N/A'],
-                ['Prepared By:', preparedBy || 'N/A']
-            ];
-        }
-
-        function getWallParametersData() {
-            const { wallLength, wallHeight, wallArea, doorArea, windowArea } = window.resultsData;
-            return [
-                ['Length:', `${wallLength.toFixed(2)} m`],
-                ['Height:', `${wallHeight.toFixed(2)} m`],
-                ['Door Area:', `${doorArea.toFixed(2)} m²`],
-                ['Window Area:', `${windowArea.toFixed(2)} m²`],
-                ['Wall Area:', `${wallArea.toFixed(2)} m²`]
-            ];
-        }
-
-        function getMaterialTableData() {
-            const materials = [];
-            for (const [name, data] of Object.entries(window.resultsData.materials || {})) {
-                materials.push([name, `${data.quantity} ${data.unit}`, `${window.resultsData.currencySymbol}${data.cost.toFixed(2)}`]);
-            }
-            return materials.length > 0 ? materials : [['No Materials', '', '0.00']];
-        }
-
-        function getAccessoryTableData() {
-            const accessories = [];
-            for (const [name, data] of Object.entries(window.resultsData.accessories || {})) {
-                accessories.push([name, `${data.quantity.toFixed(2)} ${data.unit}`, `${window.resultsData.currencySymbol}${data.cost.toFixed(2)}`]);
-            }
-            return accessories.length > 0 ? accessories : [['No Accessories', '', '0.00']];
-        }
-
-        function getCostSummaryData() {
-            const { currencySymbol, materialCost, accessoryCost, plasteringCost, laborCost, contingency, overhead, equipment, profit, totalCost, wallArea } = window.resultsData;
-            const safeDivide = (value, divisor) => !isNaN(parseFloat(value)) && parseFloat(divisor) > 0 ? (parseFloat(value) / parseFloat(divisor)).toFixed(2) : '0.00';
-            return [
-                ['Main Material Cost', `${currencySymbol}${materialCost.toFixed(2)}`, `${currencySymbol}${safeDivide(materialCost, wallArea)}/m²`],
-                ['Accessory Cost', `${currencySymbol}${accessoryCost.toFixed(2)}`, `${currencySymbol}${safeDivide(accessoryCost, wallArea)}/m²`],
-                ['Plastering Cost', `${currencySymbol}${plasteringCost.toFixed(2)}`, `${currencySymbol}${safeDivide(plasteringCost, wallArea)}/m²`],
-                ['Labor Cost', `${currencySymbol}${laborCost.toFixed(2)}`, `${currencySymbol}${safeDivide(laborCost, wallArea)}/m²`],
-                ['Contingency Cost', `${currencySymbol}${contingency.toFixed(2)}`, `${currencySymbol}${safeDivide(contingency, wallArea)}/m²`],
-                ['Overhead Cost', `${currencySymbol}${overhead.toFixed(2)}`, `${currencySymbol}${safeDivide(overhead, wallArea)}/m²`],
-                ['Equipment Cost', `${currencySymbol}${equipment.toFixed(2)}`, `${currencySymbol}${safeDivide(equipment, wallArea)}/m²`],
-                ['Profit Cost', `${currencySymbol}${profit.toFixed(2)}`, `${currencySymbol}${safeDivide(profit, wallArea)}/m²`],
-                ['Total Cost', `${currencySymbol}${totalCost.toFixed(2)}`, `${currencySymbol}${safeDivide(totalCost, wallArea)}/m²`]
-            ];
-        }
-
-        function getCurrencySymbol(currency) {
-            switch (currency) {
-                case 'PHP': return '₱';
-                case 'USD': return '$';
-                case 'EUR': return '€';
-                case 'JPY': return '¥';
-                default: return '';
-            }
+            doc.save('wall_materials_calculation.pdf');
         }
     </script>
 </body>
