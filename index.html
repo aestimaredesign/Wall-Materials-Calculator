@@ -1256,7 +1256,7 @@
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    const currencySymbol = resultsData.currencySymbol;
+    const currencySymbol = resultsData.currencySymbol || '';
 
     // Debug: Log resultsData to check if wall parameters are present
     console.log('ResultsData before PDF:', resultsData);
@@ -1265,7 +1265,7 @@
     doc.setFontSize(22);
     doc.text("Wall Materials Calculation", 105, 20, null, null, "center");
 
-    // Set project details
+    // Set project details with fallbacks
     doc.setFontSize(12);
     doc.setTextColor(100);
     doc.text(`Project Name: ${resultsData.projectName || 'N/A'}`, 20, 35);
@@ -1274,47 +1274,53 @@
     doc.text(`Date: ${resultsData.date || 'N/A'}`, 120, 35);
     doc.text(`Prepared By: ${resultsData.preparedBy || 'N/A'}`, 120, 42);
 
-    // Wall Parameters table with forced values and debug
-    const wallLength = resultsData.wallLength !== undefined ? resultsData.wallLength.toFixed(2) : 'N/A';
-    const wallHeight = resultsData.wallHeight !== undefined ? resultsData.wallHeight.toFixed(2) : 'N/A';
-    const wallArea = resultsData.wallArea !== undefined ? resultsData.wallArea.toFixed(2) : 'N/A';
-    console.log('Wall Params for PDF:', { wallLength, wallHeight, wallArea });
+    // Wall Parameters table with forced numeric conversion and fallbacks
+    const safeWallLength = !isNaN(resultsData.wallLength) ? parseFloat(resultsData.wallLength).toFixed(2) : 'N/A';
+    const safeWallHeight = !isNaN(resultsData.wallHeight) ? parseFloat(resultsData.wallHeight).toFixed(2) : 'N/A';
+    const safeWallArea = !isNaN(resultsData.wallArea) ? parseFloat(resultsData.wallArea).toFixed(2) : 'N/A';
+    console.log('Wall Params for PDF (safe values):', { safeWallLength, safeWallHeight, safeWallArea });
 
     doc.autoTable({
         startY: 60,
         head: [['Wall Parameters']],
         body: [
-            ['Length', `${wallLength} m`],
-            ['Height', `${wallHeight} m`],
-            ['Area', `${wallArea} m²`]
+            ['Length', `${safeWallLength} m`],
+            ['Height', `${safeWallHeight} m`],
+            ['Area', `${safeWallArea} m²`]
         ],
         theme: 'striped',
         headStyles: { fillColor: [44, 62, 80] },
         styles: { cellPadding: 3, fontSize: 10 }
     });
 
-    // Material data
-    const materialData = Object.keys(resultsData.materials).map(key => [
-        key,
-        `${resultsData.materials[key].quantity} ${resultsData.materials[key].unit}`,
-        `${currencySymbol}${resultsData.materials[key].cost.toFixed(2)}`
-    ]);
+    // Material data with fallback
+    const materialData = Object.keys(resultsData.materials || {}).map(key => {
+        const mat = resultsData.materials[key];
+        return [
+            key,
+            `${mat.quantity || 0} ${mat.unit || ''}`,
+            `${currencySymbol}${!isNaN(mat.cost) ? parseFloat(mat.cost).toFixed(2) : '0.00'}`
+        ];
+    });
 
     doc.autoTable({
         startY: doc.autoTable.previous.finalY + 10,
         head: [['Material Layer', 'Quantity', 'Cost']],
-        body: materialData,
+        body: materialData.length > 0 ? materialData : [['No Materials', '', '0.00']],
         theme: 'striped',
         headStyles: { fillColor: [44, 62, 80] },
         styles: { cellPadding: 3, fontSize: 10 }
     });
 
-    // Accessory data
-    const accessoryData = Object.keys(resultsData.accessories).map(key => [
-        key,
-        `${resultsData.accessories[key].quantity} ${resultsData.accessories[key].unit}`,
-        `${currencySymbol}${resultsData.accessories[key].cost.toFixed(2)}`
-    ]);
+    // Accessory data with fallback
+    const accessoryData = Object.keys(resultsData.accessories || {}).map(key => {
+        const acc = resultsData.accessories[key];
+        return [
+            key,
+            `${acc.quantity || 0} ${acc.unit || ''}`,
+            `${currencySymbol}${!isNaN(acc.cost) ? parseFloat(acc.cost).toFixed(2) : '0.00'}`
+        ];
+    });
 
     if (accessoryData.length > 0) {
         doc.autoTable({
@@ -1327,12 +1333,15 @@
         });
     }
 
-    // Plastering data
-    const plasteringData = Object.keys(resultsData.plastering).map(key => [
-        key,
-        `${resultsData.plastering[key].quantity} ${resultsData.plastering[key].unit}`,
-        `${currencySymbol}${resultsData.plastering[key].cost.toFixed(2)}`
-    ]);
+    // Plastering data with fallback
+    const plasteringData = Object.keys(resultsData.plastering || {}).map(key => {
+        const plas = resultsData.plastering[key];
+        return [
+            key,
+            `${plas.quantity || 0} ${plas.unit || ''}`,
+            `${currencySymbol}${!isNaN(plas.cost) ? parseFloat(plas.cost).toFixed(2) : '0.00'}`
+        ];
+    });
 
     if (plasteringData.length > 0) {
         doc.autoTable({
@@ -1345,14 +1354,15 @@
         });
     }
 
-    // Cost summary
+    // Cost summary with safe division
+    const safeDivide = (value, divisor) => !isNaN(value) && divisor > 0 ? parseFloat(value) / divisor : 0;
     const costSummaryData = [
-        ['Main Material Cost', `${currencySymbol}${resultsData.materialCost.toFixed(2)}`, `${currencySymbol}${(resultsData.materialCost / resultsData.wallArea).toFixed(2)}/m²`],
-        ['Accessory Cost', `${currencySymbol}${resultsData.accessoryCost.toFixed(2)}`, `${currencySymbol}${(resultsData.accessoryCost / resultsData.wallArea).toFixed(2)}/m²`],
-        ['Plastering Cost', `${currencySymbol}${resultsData.plasteringCost.toFixed(2)}`, `${currencySymbol}${(resultsData.plasteringCost / resultsData.wallArea).toFixed(2)}/m²`],
-        ['Labor Cost', `${currencySymbol}${resultsData.laborCost.toFixed(2)}`, `${currencySymbol}${(resultsData.laborCost / resultsData.wallArea).toFixed(2)}/m²`],
-        ['Contingency Cost', `${currencySymbol}${resultsData.contingency.toFixed(2)}`, `${currencySymbol}${(resultsData.contingency / resultsData.wallArea).toFixed(2)}/m²`],
-        ['Total Project Cost', `${currencySymbol}${resultsData.totalCost.toFixed(2)}`, `${currencySymbol}${(resultsData.totalCost / resultsData.wallArea).toFixed(2)}/m²`],
+        ['Main Material Cost', `${currencySymbol}${!isNaN(resultsData.materialCost) ? parseFloat(resultsData.materialCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.materialCost, resultsData.wallArea).toFixed(2)}/m²`],
+        ['Accessory Cost', `${currencySymbol}${!isNaN(resultsData.accessoryCost) ? parseFloat(resultsData.accessoryCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.accessoryCost, resultsData.wallArea).toFixed(2)}/m²`],
+        ['Plastering Cost', `${currencySymbol}${!isNaN(resultsData.plasteringCost) ? parseFloat(resultsData.plasteringCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.plasteringCost, resultsData.wallArea).toFixed(2)}/m²`],
+        ['Labor Cost', `${currencySymbol}${!isNaN(resultsData.laborCost) ? parseFloat(resultsData.laborCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.laborCost, resultsData.wallArea).toFixed(2)}/m²`],
+        ['Contingency Cost', `${currencySymbol}${!isNaN(resultsData.contingency) ? parseFloat(resultsData.contingency).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.contingency, resultsData.wallArea).toFixed(2)}/m²`],
+        ['Total Project Cost', `${currencySymbol}${!isNaN(resultsData.totalCost) ? parseFloat(resultsData.totalCost).toFixed(2) : '0.00'}`, `${currencySymbol}${safeDivide(resultsData.totalCost, resultsData.wallArea).toFixed(2)}/m²`]
     ];
 
     doc.autoTable({
