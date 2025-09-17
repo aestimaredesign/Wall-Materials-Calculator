@@ -1279,8 +1279,8 @@
 
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('Arial', 'bold'); // Set Arial font for title
+    doc.setFontSize(12); // Title font size
     doc.text("Wall Materials Calculation Summary", 14, 22);
 
     const projectInfoData = getProjectInfoData();
@@ -1295,11 +1295,11 @@
         head: [[{
             content: 'Project Information',
             colSpan: 2,
-            styles: { fontStyle: 'bold', halign: 'center' }
+            styles: { fontStyle: 'bold', halign: 'center', font: 'Arial', fontSize: 10 }
         }]],
         body: projectInfoData,
         theme: 'plain',
-        styles: { fontSize: 12, cellPadding: 2 },
+        styles: { font: 'Arial', fontSize: 10, cellPadding: 2 },
         headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
         columnStyles: { 0: { fontStyle: 'bold', minWidth: 50 } }
     });
@@ -1310,11 +1310,11 @@
         head: [[{
             content: 'Wall Parameters',
             colSpan: 2,
-            styles: { fontStyle: 'bold', halign: 'center' }
+            styles: { fontStyle: 'bold', halign: 'center', font: 'Arial', fontSize: 10 }
         }]],
         body: wallParametersData,
         theme: 'plain',
-        styles: { fontSize: 12, cellPadding: 2 },
+        styles: { font: 'Arial', fontSize: 10, cellPadding: 2 },
         headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
         columnStyles: { 0: { fontStyle: 'bold', minWidth: 50 } }
     });
@@ -1326,11 +1326,11 @@
             head: [[{
                 content: 'Material Layers',
                 colSpan: 3,
-                styles: { fontStyle: 'bold', halign: 'center' }
+                styles: { fontStyle: 'bold', halign: 'center', font: 'Arial', fontSize: 10 }
             }]],
             body: materialData,
             theme: 'plain',
-            styles: { fontSize: 12, cellPadding: 2 },
+            styles: { font: 'Arial', fontSize: 10, cellPadding: 2 },
             headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
             columnStyles: { 0: { fontStyle: 'bold', minWidth: 50 } }
         });
@@ -1343,11 +1343,11 @@
             head: [[{
                 content: 'Accessory Materials',
                 colSpan: 3,
-                styles: { fontStyle: 'bold', halign: 'center' }
+                styles: { fontStyle: 'bold', halign: 'center', font: 'Arial', fontSize: 10 }
             }]],
             body: accessoryData,
             theme: 'plain',
-            styles: { fontSize: 12, cellPadding: 2 },
+            styles: { font: 'Arial', fontSize: 10, cellPadding: 2 },
             headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
             columnStyles: { 0: { fontStyle: 'bold', minWidth: 50 } }
         });
@@ -1356,11 +1356,15 @@
     // Cost Summary Table
     doc.autoTable({
         startY: doc.autoTable.previous.finalY + 10,
-        head: [['Cost Summary', 'Total Cost', 'Cost per m²']],
+        head: [[{
+            content: 'Cost Summary',
+            colSpan: 3,
+            styles: { fontStyle: 'bold', halign: 'center', font: 'Arial', fontSize: 10 }
+        }]],
         body: costSummaryData,
-        theme: 'striped',
-        headStyles: { fillColor: [44, 62, 80] },
-        styles: { fontSize: 12, cellPadding: 2 }
+        theme: 'plain', // Changed from 'striped' to 'plain' for consistency
+        headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
+        styles: { font: 'Arial', fontSize: 10, cellPadding: 2 }
     });
 
     // Final download
