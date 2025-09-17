@@ -1258,30 +1258,34 @@
 
     const currencySymbol = resultsData.currencySymbol;
 
+    // Set the title
     doc.setFontSize(22);
     doc.text("Wall Materials Calculation", 105, 20, null, null, "center");
 
+    // Set project details
     doc.setFontSize(12);
     doc.setTextColor(100);
-    doc.text(`Project Name: ${resultsData.projectName}`, 20, 35);
-    doc.text(`Location: ${resultsData.projectLocation}`, 20, 42);
-    doc.text(`Client: ${resultsData.clientName}`, 20, 49);
-    doc.text(`Date: ${resultsData.date}`, 120, 35);
-    doc.text(`Prepared By: ${resultsData.preparedBy}`, 120, 42);
+    doc.text(`Project Name: ${resultsData.projectName || 'N/A'}`, 20, 35);
+    doc.text(`Location: ${resultsData.projectLocation || 'N/A'}`, 20, 42);
+    doc.text(`Client: ${resultsData.clientName || 'N/A'}`, 20, 49);
+    doc.text(`Date: ${resultsData.date || 'N/A'}`, 120, 35);
+    doc.text(`Prepared By: ${resultsData.preparedBy || 'N/A'}`, 120, 42);
 
+    // Wall Parameters table with fallback values
     doc.autoTable({
         startY: 60,
         head: [['Wall Parameters']],
         body: [
-            ['Length', `${resultsData.wallLength} m`],
-            ['Height', `${resultsData.wallHeight} m`],
-            ['Area', `${resultsData.wallArea.toFixed(2)} m²`]
+            ['Length', `${resultsData.wallLength !== undefined ? resultsData.wallLength.toFixed(2) : 'N/A'} m`],
+            ['Height', `${resultsData.wallHeight !== undefined ? resultsData.wallHeight.toFixed(2) : 'N/A'} m`],
+            ['Area', `${resultsData.wallArea !== undefined ? resultsData.wallArea.toFixed(2) : 'N/A'} m²`]
         ],
         theme: 'striped',
         headStyles: { fillColor: [44, 62, 80] },
         styles: { cellPadding: 3, fontSize: 10 }
     });
 
+    // Material data
     const materialData = Object.keys(resultsData.materials).map(key => [
         key,
         `${resultsData.materials[key].quantity} ${resultsData.materials[key].unit}`,
@@ -1297,6 +1301,7 @@
         styles: { cellPadding: 3, fontSize: 10 }
     });
 
+    // Accessory data
     const accessoryData = Object.keys(resultsData.accessories).map(key => [
         key,
         `${resultsData.accessories[key].quantity} ${resultsData.accessories[key].unit}`,
@@ -1314,6 +1319,7 @@
         });
     }
 
+    // Plastering data
     const plasteringData = Object.keys(resultsData.plastering).map(key => [
         key,
         `${resultsData.plastering[key].quantity} ${resultsData.plastering[key].unit}`,
@@ -1331,6 +1337,7 @@
         });
     }
 
+    // Cost summary
     const costSummaryData = [
         ['Main Material Cost', `${currencySymbol}${resultsData.materialCost.toFixed(2)}`, `${currencySymbol}${(resultsData.materialCost / resultsData.wallArea).toFixed(2)}/m²`],
         ['Accessory Cost', `${currencySymbol}${resultsData.accessoryCost.toFixed(2)}`, `${currencySymbol}${(resultsData.accessoryCost / resultsData.wallArea).toFixed(2)}/m²`],
