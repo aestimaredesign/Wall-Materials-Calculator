@@ -1300,7 +1300,7 @@
     doc.text(`Date: ${resultsData.date || 'N/A'}`, 120, 35);
     doc.text(`Prepared By: ${resultsData.preparedBy || 'N/A'}`, 120, 42);
 
-    // Wall Parameters table - Simplified two-column structure
+    // Wall Parameters table - Centered values in the "Value" column
     const wallLength = resultsData.wallLength || 0;
     const wallHeight = resultsData.wallHeight || 0;
     const wallArea = resultsData.wallArea || 0;
@@ -1322,8 +1322,8 @@
             halign: 'left'
         },
         columnStyles: {
-            0: { fontStyle: 'bold' },
-            1: { halign: 'right' }
+            0: { fontStyle: 'bold', halign: 'left' }, // Parameter names bold and left-aligned
+            1: { halign: 'center' } // Values centered in the "Value" column
         }
     });
 
