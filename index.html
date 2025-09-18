@@ -988,75 +988,243 @@
         }
 
         function downloadPDF() {
-            console.log('Attempting to download PDF, resultsData:', resultsData);
-            if (!window.jspdf || !resultsData || !resultsData.materials || resultsData.materials.length === 0) {
-                console.error('jsPDF not loaded or no results data:', { jspdf: window.jspdf, resultsData });
-                displayError('PDF generation failed. Ensure calculations are performed and the page is fully loaded.');
-                return;
-            }
+    console.log('Attempting to download PDF, resultsData:', resultsData);
+    if (!window.jspdf || !resultsData || !resultsData.materials || resultsData.materials.length === 0) {
+        console.error('jsPDF not loaded or no results data:', { jspdf: window.jspdf, resultsData });
+        displayError('PDF generation failed. Ensure calculations are performed and the page is fully loaded.');
+        return;
+    }
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(16);
-            doc.text('Wall Materials Calculator Results', 10, 10);
+    // Get currency symbol
+    const currency = document.getElementById('currency').value || 'PHP';
+    const currencySymbol = { 'PHP': '₱', 'USD': '$', 'EUR': '€', 'JPY': '¥' }[currency] || '₱';
 
-            let y = 20;
-            doc.setFontSize(12);
-            doc.text(`Project Name: ${document.getElementById('projectName').value || 'N/A'}`, 10, y += 10);
-            doc.text(`Project Location: ${document.getElementById('projectLocation').value || 'N/A'}`, 10, y += 10);
-            doc.text(`Client: ${document.getElementById('clientName').value || 'N/A'}`, 10, y += 10);
-            doc.text(`Company: ${document.getElementById('companyName').value || 'N/A'}`, 10, y += 10);
-            doc.text(`Date: ${document.getElementById('date').value || 'N/A'}`, 10, y += 10);
-            doc.text(`Prepared By: ${document.getElementById('preparedBy').value || 'N/A'}`, 10, y += 10);
-            doc.text(`Wall Area: ${document.getElementById('wallArea')?.textContent || 'N/A'}`, 10, y += 10);
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    
+    // Set document properties
+    doc.setProperties({
+        title: 'Wall Materials Calculation Report',
+        subject: 'Construction Materials Estimation',
+        author: document.getElementById('preparedBy').value || 'Unknown',
+        keywords: 'construction, materials, calculator, estimation',
+        creator: 'Wall Materials Calculator'
+    });
 
-            y += 10;
-            doc.text('Materials:', 10, y += 10);
-            resultsData.materials.forEach((mat, idx) => {
-                const materialType = mat.type;
-                const unit = materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === materialType)].unit;
-                if (y > 280) { // Prevent overflow, add new page
-                    doc.addPage();
-                    y = 20;
-                }
-                doc.text(`${idx + 1}. ${mat.type}: ${mat.quantity.toFixed(2)} ${unit} (Cost: ${currencySymbol}${mat.totalCost.toFixed(2)}) - Sides: ${mat.sideFactor}`, 10, y += 10);
-            });
+    // Add title
+    doc.setFontSize(18);
+    doc.setTextColor(40, 40, 40);
+    doc.text('Wall Materials Calculator Results', 105, 20, { align: 'center' });
+    
+    // Add horizontal line
+    doc.setDrawColor(200, 200, 200);
+    doc.line(10, 25, 200, 25);
 
-            y += 10;
-            doc.text('Accessories:', 10, y += 10);
-            if (y > 280) {
-                doc.addPage();
-                y = 20;
-            }
-            doc.text(`Total Cost: ${currencySymbol}${resultsData.accessories.total.toFixed(2)}`, 10, y += 10);
-
-            y += 10;
-            doc.text('Plastering:', 10, y += 10);
-            if (y > 280) {
-                doc.addPage();
-                y = 20;
-            }
-            doc.text(`Total Cost: ${currencySymbol}${resultsData.plastering.total.toFixed(2)}`, 10, y += 10);
-
-            y += 10;
-            doc.text('Labor:', 10, y += 10);
-            if (y > 280) {
-                doc.addPage();
-                y = 20;
-            }
-            doc.text(`Total Cost: ${currencySymbol}${resultsData.labor.total.toFixed(2)}`, 10, y += 10);
-
-            y += 10;
-            doc.text('Total Cost:', 10, y += 10);
-            if (y > 280) {
-                doc.addPage();
-                y = 20;
-            }
-            doc.text(`${currencySymbol}${resultsData.costs.total.toFixed(2)}`, 10, y += 10);
-
-            console.log('PDF generated, saving file');
-            doc.save('wall_materials_calculation.pdf');
+    // Project information
+    doc.setFontSize(12);
+    let y = 35;
+    
+    doc.setFont(undefined, 'bold');
+    doc.text('Project Information', 10, y);
+    doc.setFont(undefined, 'normal');
+    
+    y += 8;
+    doc.text(`Project Name: ${document.getElementById('projectName').value || 'N/A'}`, 10, y);
+    doc.text(`Date: ${document.getElementById('date').value || 'N/A'}`, 110, y);
+    
+    y += 7;
+    doc.text(`Location: ${document.getElementById('projectLocation').value || 'N/A'}`, 10, y);
+    doc.text(`Prepared By: ${document.getElementById('preparedBy').value || 'N/A'}`, 110, y);
+    
+    y += 7;
+    doc.text(`Client: ${document.getElementById('clientName').value || 'N/A'}`, 10, y);
+    doc.text(`Company: ${document.getElementById('companyName').value || 'N/A'}`, 110, y);
+    
+    y += 15;
+    
+    // Wall parameters
+    doc.setFont(undefined, 'bold');
+    doc.text('Wall Parameters', 10, y);
+    doc.setFont(undefined, 'normal');
+    
+    y += 8;
+    doc.text(`Length: ${document.getElementById('wallLengthResult').textContent || 'N/A'}`, 10, y);
+    doc.text(`Height: ${document.getElementById('wallHeightResult').textContent || 'N/A'}`, 60, y);
+    doc.text(`Door Area: ${document.getElementById('doorAreaResult').textContent || 'N/A'}`, 110, y);
+    doc.text(`Window Area: ${document.getElementById('windowAreaResult').textContent || 'N/A'}`, 160, y);
+    
+    y += 7;
+    doc.text(`Total Wall Area: ${document.getElementById('wallArea').textContent || 'N/A'}`, 10, y);
+    
+    y += 15;
+    
+    // Materials summary
+    doc.setFont(undefined, 'bold');
+    doc.text('Materials Summary', 10, y);
+    doc.setFont(undefined, 'normal');
+    
+    y += 8;
+    
+    // Create materials table
+    const materialsTable = {
+        head: [['Material', 'Quantity', 'Cost']],
+        body: resultsData.materials.map(mat => {
+            const materialType = mat.type;
+            const unit = materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === materialType)]?.unit || 'units';
+            return [
+                mat.type,
+                `${mat.quantity.toFixed(2)} ${unit}`,
+                `${currencySymbol}${mat.totalCost.toFixed(2)}`
+            ];
+        })
+    };
+    
+    // Add materials table
+    doc.autoTable({
+        startY: y,
+        head: materialsTable.head,
+        body: materialsTable.body,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [52, 152, 219],
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        styles: {
+            fontSize: 10,
+            cellPadding: 3
+        },
+        margin: { left: 10, right: 10 }
+    });
+    
+    y = doc.lastAutoTable.finalY + 10;
+    
+    // Check if we need a new page
+    if (y > 250) {
+        doc.addPage();
+        y = 20;
+    }
+    
+    // Cost summary
+    doc.setFont(undefined, 'bold');
+    doc.text('Cost Summary', 10, y);
+    doc.setFont(undefined, 'normal');
+    
+    y += 8;
+    
+    // Create cost summary table
+    const costTable = {
+        head: [['Item', 'Cost', 'Cost/m²']],
+        body: [
+            [
+                'Materials',
+                `${currencySymbol}${document.getElementById('materialCostResult').textContent || '0.00'}`,
+                `${currencySymbol}${document.getElementById('materialCostSqm').textContent || '0.00'}`
+            ],
+            [
+                'Accessories',
+                `${currencySymbol}${document.getElementById('accessoryCostResult').textContent || '0.00'}`,
+                `${currencySymbol}${document.getElementById('accessoryCostSqm').textContent || '0.00'}`
+            ],
+            [
+                'Plastering',
+                `${currencySymbol}${document.getElementById('plasteringCostResult').textContent || '0.00'}`,
+                `${currencySymbol}${document.getElementById('plasteringCostSqm').textContent || '0.00'}`
+            ],
+            [
+                'Labor',
+                `${currencySymbol}${document.getElementById('laborCostResult').textContent || '0.00'}`,
+                `${currencySymbol}${document.getElementById('laborCostSqm').textContent || '0.00'}`
+            ],
+            [
+                'Contingency',
+                `${currencySymbol}${document.getElementById('contingencyCostResult').textContent || '0.00'}`,
+                `${currencySymbol}${document.getElementById('contingencyCostSqm').textContent || '0.00'}`
+            ],
+            [
+                'Overhead',
+                `${currencySymbol}${document.getElementById('overheadCostResult').textContent || '0.00'}`,
+                `${currencySymbol}${document.getElementById('overheadCostSqm').textContent || '0.00'}`
+            ],
+            [
+                'Equipment',
+                `${currencySymbol}${document.getElementById('equipmentCostResult').textContent || '0.00'}`,
+                `${currencySymbol}${document.getElementById('equipmentCostSqm').textContent || '0.00'}`
+            ],
+            [
+                'Profit',
+                `${currencySymbol}${document.getElementById('profitCostResult').textContent || '0.00'}`,
+                `${currencySymbol}${document.getElementById('profitCostSqm').textContent || '0.00'}`
+            ],
+            [
+                'TOTAL',
+                `${currencySymbol}${document.getElementById('totalCost').textContent || '0.00'}`,
+                `${currencySymbol}${document.getElementById('totalCostSqm').textContent || '0.00'}`
+            ]
+        ]
+    };
+    
+    // Add cost summary table
+    doc.autoTable({
+        startY: y,
+        head: costTable.head,
+        body: costTable.body,
+        theme: 'grid',
+        headStyles: {
+            fillColor: [52, 152, 219],
+            textColor: 255,
+            fontStyle: 'bold'
+        },
+        styles: {
+            fontSize: 10,
+            cellPadding: 3
+        },
+        margin: { left: 10, right: 10 },
+        footStyles: {
+            fillColor: [44, 62, 80],
+            textColor: 255,
+            fontStyle: 'bold'
         }
+    });
+    
+    y = doc.lastAutoTable.finalY + 10;
+    
+    // Check if we need a new page
+    if (y > 250) {
+        doc.addPage();
+        y = 20;
+    }
+    
+    // Labor details
+    doc.setFont(undefined, 'bold');
+    doc.text('Labor Details', 10, y);
+    doc.setFont(undefined, 'normal');
+    
+    y += 8;
+    doc.text(`Number of Laborers: ${document.getElementById('laborersResult').textContent || 'N/A'}`, 10, y);
+    doc.text(`Productivity Rate: ${document.getElementById('productivityRate').textContent || 'N/A'} m²/day`, 80, y);
+    
+    y += 7;
+    doc.text(`Preparation Time: ${document.getElementById('prepTimeResult').textContent || 'N/A'} days`, 10, y);
+    doc.text(`Installation Time: ${document.getElementById('installTime').textContent || 'N/A'} days`, 80, y);
+    
+    y += 7;
+    doc.text(`Cleanup Time: ${document.getElementById('cleanupTimeResult').textContent || 'N/A'} days`, 10, y);
+    doc.text(`Total Duration: ${document.getElementById('totalDays').textContent || 'N/A'} days`, 80, y);
+    
+    // Add footer with page numbers
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(10);
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Page ${i} of ${pageCount}`, 200, 290, { align: 'right' });
+        doc.text(`Generated on ${new Date().toLocaleDateString()}`, 10, 290);
+    }
+
+    console.log('PDF generated, saving file');
+    doc.save('wall_materials_calculation.pdf');
+}
     </script>
 </body>
 </html>
