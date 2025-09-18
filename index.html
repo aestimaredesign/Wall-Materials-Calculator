@@ -363,13 +363,26 @@
             color: var(--dark-gray);
             margin-top: 4px;
         }
+        .side-plies {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 4px;
+            border-left: 2px solid var(--secondary-color);
+        }
+        .side-plies label {
+            font-size: 13px;
+        }
+        .side-plies input {
+            width: 60px !important;
+        }
     </style>
 </head>
 <body>
     <div class="wall-calculator">
         <div class="calculator-form">
             <h1>Wall Materials Calculator</h1>
-                        <form id="calculatorForm">
+            <form id="calculatorForm">
                 <div class="tab-container">
                     <div class="tab active" data-tab="project">Project Info</div>
                     <div class="tab" data-tab="materials">Materials</div>
@@ -688,15 +701,22 @@
                     <input type="number" id="wasteFactor-${materialCount}" step="1" min="0" max="50" value="5" title="Percentage of waste factor" required>
                 </label>
                 <div class="framed-wall-options" id="framedWallOptions-${materialCount}" style="display:none;">
-                    <label class="plies-label">Number of Plies:
-                        <input type="number" id="plies-${materialCount}" step="1" min="1" value="1" title="Number of plies for framed walls">
-                    </label>
                     <div class="side-selection">
                         <div class="side-box">
-                            <label><input type="checkbox" id="side1-${materialCount}" checked> Side 1 (Framed)</label>
+                            <label><input type="checkbox" id="side1-${materialCount}" checked onchange="toggleSideOptions(${materialCount}, 1)"> Side 1</label>
+                            <div class="side-plies" id="side1-plies-${materialCount}">
+                                <label>Number of Plies:
+                                    <input type="number" id="side1-plies-count-${materialCount}" step="1" min="1" value="1" title="Number of plies for side 1">
+                                </label>
+                            </div>
                         </div>
                         <div class="side-box">
-                            <label><input type="checkbox" id="side2-${materialCount}" checked> Side 2 (Framed)</label>
+                            <label><input type="checkbox" id="side2-${materialCount}" checked onchange="toggleSideOptions(${materialCount}, 2)"> Side 2</label>
+                            <div class="side-plies" id="side2-plies-${materialCount}">
+                                <label>Number of Plies:
+                                    <input type="number" id="side2-plies-count-${materialCount}" step="1" min="1" value="1" title="Number of plies for side 2">
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -752,6 +772,17 @@
             }
         }
 
+        function toggleSideOptions(materialIndex, sideNumber) {
+            const sideCheckbox = document.getElementById(`side${sideNumber}-${materialIndex}`);
+            const sidePlies = document.getElementById(`side${sideNumber}-plies-${materialIndex}`);
+            
+            if (sideCheckbox.checked) {
+                sidePlies.style.display = 'block';
+            } else {
+                sidePlies.style.display = 'none';
+            }
+        }
+
         function toggleSection(sectionId) {
             const section = document.getElementById(sectionId);
             const toggle = section.previousElementSibling;
@@ -783,13 +814,39 @@
                     const config = materialConfig[materialType];
                     const wasteFactor = parseFloat(document.getElementById(`wasteFactor-${i}`).value) / 100 || 0;
                     const costPerUnit = parseFloat(document.getElementById(`materialCost-${i}`).value) || 0;
-                    const plies = config.supportsPlies ? parseInt(document.getElementById(`plies-${i}`).value) || 1 : 1;
-                    const side1Framed = document.getElementById(`side1-${i}`).checked ? 1 : 0;
-                    const side2Framed = document.getElementById(`side2-${i}`).checked ? 1 : 0;
-                    const sideFactor = side1Framed + side2Framed; // 0, 1, or 2 sides framed
+                    
+                    let side1Plies = 0;
+                    let side2Plies = 0;
 
-                    const quantity = Math.ceil(wallArea / config.unitArea) * (1 + wasteFactor) * plies * sideFactor;
-                    materials.push({ type: config.name, quantity, costPerUnit, totalCost: quantity * costPerUnit, productivityRate: config.productivityRate, sideFactor });
+                    if (config.supportsPlies) {
+                        const side1Framed = document.getElementById(`side1-${i}`).checked;
+                        const side2Framed = document.getElementById(`side2-${i}`).checked;
+                        
+                        if (side1Framed) {
+                            side1Plies = parseInt(document.getElementById(`side1-plies-count-${i}`).value) || 1;
+                        }
+                        
+                        if (side2Framed) {
+                            side2Plies = parseInt(document.getElementById(`side2-plies-count-${i}`).value) || 1;
+                        }
+                    } else {
+                        const side1Framed = document.getElementById(`side1-${i}`).checked ? 1 : 0;
+                        const side2Framed = document.getElementById(`side2-${i}`).checked ? 1 : 0;
+                        side1Plies = side1Framed;
+                        side2Plies = side2Framed;
+                    }
+
+                    const totalPlies = side1Plies + side2Plies;
+                    const quantity = Math.ceil(wallArea / config.unitArea) * (1 + wasteFactor) * totalPlies;
+                    materials.push({ 
+                        type: config.name, 
+                        quantity, 
+                        costPerUnit, 
+                        totalCost: quantity * costPerUnit, 
+                        productivityRate: config.productivityRate, 
+                        side1Plies,
+                        side2Plies 
+                    });
                     totalProductivityRate += config.productivityRate / materialCount;
                 }
             }
@@ -807,7 +864,7 @@
             let materialResultsHtml = '<ul>';
             let totalMaterialCost = 0;
             materials.forEach((mat, idx) => {
-                materialResultsHtml += `<li>${mat.type}: ${mat.quantity.toFixed(2)} ${materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === mat.type)].unit} (Cost: ${currencySymbol}${mat.totalCost.toFixed(2)}) - Sides: ${mat.sideFactor}</li>`;
+                materialResultsHtml += `<li>${mat.type}: ${mat.quantity.toFixed(2)} ${materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === mat.type)].unit} (Cost: ${currencySymbol}${mat.totalCost.toFixed(2)}) - Side 1: ${mat.side1Plies} plies, Side 2: ${mat.side2Plies} plies</li>`;
                 totalMaterialCost += mat.totalCost;
             });
             materialResultsHtml += '</ul>';
@@ -831,46 +888,46 @@
             materials.forEach((mat) => {
                 const config = materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === mat.type)];
                 const index = materials.indexOf(mat) + 1;
-                const sideFactor = mat.sideFactor;
+                const totalPlies = mat.side1Plies + mat.side2Plies;
 
-                if (config.accessories.studs && sideFactor > 0) {
-                    const studQty = Math.ceil(length / 0.6) * height * (config.supportsPlies ? parseInt(document.getElementById(`plies-${index}`).value) || 1 : 1) * sideFactor;
+                if (config.accessories.studs && totalPlies > 0) {
+                    const studQty = Math.ceil(length / 0.6) * height * totalPlies;
                     const studTotal = studQty * studCost;
                     accessoryResultsHtml += `<li>Studs: ${studQty.toFixed(2)} m (Cost: ${currencySymbol}${studTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += studTotal;
                 }
-                if (config.accessories.tracks && sideFactor > 0) {
-                    const trackQty = 2 * length * (config.supportsPlies ? parseInt(document.getElementById(`plies-${index}`).value) || 1 : 1) * sideFactor;
+                if (config.accessories.tracks && totalPlies > 0) {
+                    const trackQty = 2 * length * totalPlies;
                     const trackTotal = trackQty * trackCost;
                     accessoryResultsHtml += `<li>Tracks: ${trackQty.toFixed(2)} m (Cost: ${currencySymbol}${trackTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += trackTotal;
                 }
-                if (config.accessories.screws && sideFactor > 0) {
-                    const screwQty = Math.ceil(wallArea * 25) * (config.supportsPlies ? parseInt(document.getElementById(`plies-${index}`).value) || 1 : 1) * sideFactor;
+                if (config.accessories.screws && totalPlies > 0) {
+                    const screwQty = Math.ceil(wallArea * 25) * totalPlies;
                     const screwTotal = screwQty * screwCost;
                     accessoryResultsHtml += `<li>Screws: ${screwQty.toFixed(2)} pieces (Cost: ${currencySymbol}${screwTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += screwTotal;
                 }
-                if (config.accessories.jointCompound && sideFactor > 0) {
-                    const jointCompoundQty = wallArea * 0.5 * (config.supportsPlies ? parseInt(document.getElementById(`plies-${index}`).value) || 1 : 1) * sideFactor;
+                if (config.accessories.jointCompound && totalPlies > 0) {
+                    const jointCompoundQty = wallArea * 0.5 * totalPlies;
                     const jointCompoundTotal = jointCompoundQty * jointCompoundCost;
                     accessoryResultsHtml += `<li>Joint Compound: ${jointCompoundQty.toFixed(2)} kg (Cost: ${currencySymbol}${jointCompoundTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += jointCompoundTotal;
                 }
-                if (config.accessories.sealants && sideFactor > 0) {
-                    const sealantQty = length * 0.1 * sideFactor;
+                if (config.accessories.sealants && totalPlies > 0) {
+                    const sealantQty = length * 0.1 * totalPlies;
                     const sealantTotal = sealantQty * sealantCost;
                     accessoryResultsHtml += `<li>Sealant: ${sealantQty.toFixed(2)} tubes (Cost: ${currencySymbol}${sealantTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += sealantTotal;
                 }
-                if (config.accessories.rebars && sideFactor > 0) {
-                    const rebarQty = wallArea * 0.1 * sideFactor;
+                if (config.accessories.rebars && totalPlies > 0) {
+                    const rebarQty = wallArea * 0.1 * totalPlies;
                     const rebarTotal = rebarQty * rebarCost;
                     accessoryResultsHtml += `<li>Rebar: ${rebarQty.toFixed(2)} m (Cost: ${currencySymbol}${rebarTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += rebarTotal;
                 }
-                if (config.accessories.connectors && sideFactor > 0) {
-                    const connectorQty = Math.ceil(wallArea / 2) * sideFactor;
+                if (config.accessories.connectors && totalPlies > 0) {
+                    const connectorQty = Math.ceil(wallArea / 2) * totalPlies;
                     const connectorTotal = connectorQty * connectorCost;
                     accessoryResultsHtml += `<li>Connectors: ${connectorQty.toFixed(2)} pieces (Cost: ${currencySymbol}${connectorTotal.toFixed(2)})</li>`;
                     totalAccessoryCost += connectorTotal;
@@ -988,243 +1045,243 @@
         }
 
         function downloadPDF() {
-    console.log('Attempting to download PDF, resultsData:', resultsData);
-    if (!window.jspdf || !resultsData || !resultsData.materials || resultsData.materials.length === 0) {
-        console.error('jsPDF not loaded or no results data:', { jspdf: window.jspdf, resultsData });
-        displayError('PDF generation failed. Ensure calculations are performed and the page is fully loaded.');
-        return;
-    }
+            console.log('Attempting to download PDF, resultsData:', resultsData);
+            if (!window.jspdf || !resultsData || !resultsData.materials || resultsData.materials.length === 0) {
+                console.error('jsPDF not loaded or no results data:', { jspdf: window.jspdf, resultsData });
+                displayError('PDF generation failed. Ensure calculations are performed and the page is fully loaded.');
+                return;
+            }
 
-    // Get currency symbol
-    const currency = document.getElementById('currency').value || 'PHP';
-    const currencySymbol = { 'PHP': '₱', 'USD': '$', 'EUR': '€', 'JPY': '¥' }[currency] || '₱';
+            // Get currency symbol
+            const currency = document.getElementById('currency').value || 'PHP';
+            const currencySymbol = { 'PHP': '₱', 'USD': '$', 'EUR': '€', 'JPY': '¥' }[currency] || '₱';
 
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
-    
-    // Set document properties
-    doc.setProperties({
-        title: 'Wall Materials Calculation Report',
-        subject: 'Construction Materials Estimation',
-        author: document.getElementById('preparedBy').value || 'Unknown',
-        keywords: 'construction, materials, calculator, estimation',
-        creator: 'Wall Materials Calculator'
-    });
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Set document properties
+            doc.setProperties({
+                title: 'Wall Materials Calculation Report',
+                subject: 'Construction Materials Estimation',
+                author: document.getElementById('preparedBy').value || 'Unknown',
+                keywords: 'construction, materials, calculator, estimation',
+                creator: 'Wall Materials Calculator'
+            });
 
-    // Add title
-    doc.setFontSize(18);
-    doc.setTextColor(40, 40, 40);
-    doc.text('Wall Materials Calculator Results', 105, 20, { align: 'center' });
-    
-    // Add horizontal line
-    doc.setDrawColor(200, 200, 200);
-    doc.line(10, 25, 200, 25);
+            // Add title
+            doc.setFontSize(18);
+            doc.setTextColor(40, 40, 40);
+            doc.text('Wall Materials Calculator Results', 105, 20, { align: 'center' });
+            
+            // Add horizontal line
+            doc.setDrawColor(200, 200, 200);
+            doc.line(10, 25, 200, 25);
 
-    // Project information
-    doc.setFontSize(12);
-    let y = 35;
-    
-    doc.setFont(undefined, 'bold');
-    doc.text('Project Information', 10, y);
-    doc.setFont(undefined, 'normal');
-    
-    y += 8;
-    doc.text(`Project Name: ${document.getElementById('projectName').value || 'N/A'}`, 10, y);
-    doc.text(`Date: ${document.getElementById('date').value || 'N/A'}`, 110, y);
-    
-    y += 7;
-    doc.text(`Location: ${document.getElementById('projectLocation').value || 'N/A'}`, 10, y);
-    doc.text(`Prepared By: ${document.getElementById('preparedBy').value || 'N/A'}`, 110, y);
-    
-    y += 7;
-    doc.text(`Client: ${document.getElementById('clientName').value || 'N/A'}`, 10, y);
-    doc.text(`Company: ${document.getElementById('companyName').value || 'N/A'}`, 110, y);
-    
-    y += 15;
-    
-    // Wall parameters
-    doc.setFont(undefined, 'bold');
-    doc.text('Wall Parameters', 10, y);
-    doc.setFont(undefined, 'normal');
-    
-    y += 8;
-    doc.text(`Length: ${document.getElementById('wallLengthResult').textContent || 'N/A'}`, 10, y);
-    doc.text(`Height: ${document.getElementById('wallHeightResult').textContent || 'N/A'}`, 60, y);
-    doc.text(`Door Area: ${document.getElementById('doorAreaResult').textContent || 'N/A'}`, 110, y);
-    doc.text(`Window Area: ${document.getElementById('windowAreaResult').textContent || 'N/A'}`, 160, y);
-    
-    y += 7;
-    doc.text(`Total Wall Area: ${document.getElementById('wallArea').textContent || 'N/A'}`, 10, y);
-    
-    y += 15;
-    
-    // Materials summary
-    doc.setFont(undefined, 'bold');
-    doc.text('Materials Summary', 10, y);
-    doc.setFont(undefined, 'normal');
-    
-    y += 8;
-    
-    // Create materials table
-    const materialsTable = {
-        head: [['Material', 'Quantity', 'Cost']],
-        body: resultsData.materials.map(mat => {
-            const materialType = mat.type;
-            const unit = materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === materialType)]?.unit || 'units';
-            return [
-                mat.type,
-                `${mat.quantity.toFixed(2)} ${unit}`,
-                `${currencySymbol}${mat.totalCost.toFixed(2)}`
-            ];
-        })
-    };
-    
-    // Add materials table
-    doc.autoTable({
-        startY: y,
-        head: materialsTable.head,
-        body: materialsTable.body,
-        theme: 'grid',
-        headStyles: {
-            fillColor: [52, 152, 219],
-            textColor: 255,
-            fontStyle: 'bold'
-        },
-        styles: {
-            fontSize: 10,
-            cellPadding: 3
-        },
-        margin: { left: 10, right: 10 }
-    });
-    
-    y = doc.lastAutoTable.finalY + 10;
-    
-    // Check if we need a new page
-    if (y > 250) {
-        doc.addPage();
-        y = 20;
-    }
-    
-    // Cost summary
-    doc.setFont(undefined, 'bold');
-    doc.text('Cost Summary', 10, y);
-    doc.setFont(undefined, 'normal');
-    
-    y += 8;
-    
-    // Create cost summary table
-    const costTable = {
-        head: [['Item', 'Cost', 'Cost/m²']],
-        body: [
-            [
-                'Materials',
-                `${currencySymbol}${document.getElementById('materialCostResult').textContent || '0.00'}`,
-                `${currencySymbol}${document.getElementById('materialCostSqm').textContent || '0.00'}`
-            ],
-            [
-                'Accessories',
-                `${currencySymbol}${document.getElementById('accessoryCostResult').textContent || '0.00'}`,
-                `${currencySymbol}${document.getElementById('accessoryCostSqm').textContent || '0.00'}`
-            ],
-            [
-                'Plastering',
-                `${currencySymbol}${document.getElementById('plasteringCostResult').textContent || '0.00'}`,
-                `${currencySymbol}${document.getElementById('plasteringCostSqm').textContent || '0.00'}`
-            ],
-            [
-                'Labor',
-                `${currencySymbol}${document.getElementById('laborCostResult').textContent || '0.00'}`,
-                `${currencySymbol}${document.getElementById('laborCostSqm').textContent || '0.00'}`
-            ],
-            [
-                'Contingency',
-                `${currencySymbol}${document.getElementById('contingencyCostResult').textContent || '0.00'}`,
-                `${currencySymbol}${document.getElementById('contingencyCostSqm').textContent || '0.00'}`
-            ],
-            [
-                'Overhead',
-                `${currencySymbol}${document.getElementById('overheadCostResult').textContent || '0.00'}`,
-                `${currencySymbol}${document.getElementById('overheadCostSqm').textContent || '0.00'}`
-            ],
-            [
-                'Equipment',
-                `${currencySymbol}${document.getElementById('equipmentCostResult').textContent || '0.00'}`,
-                `${currencySymbol}${document.getElementById('equipmentCostSqm').textContent || '0.00'}`
-            ],
-            [
-                'Profit',
-                `${currencySymbol}${document.getElementById('profitCostResult').textContent || '0.00'}`,
-                `${currencySymbol}${document.getElementById('profitCostSqm').textContent || '0.00'}`
-            ],
-            [
-                'TOTAL',
-                `${currencySymbol}${document.getElementById('totalCost').textContent || '0.00'}`,
-                `${currencySymbol}${document.getElementById('totalCostSqm').textContent || '0.00'}`
-            ]
-        ]
-    };
-    
-    // Add cost summary table
-    doc.autoTable({
-        startY: y,
-        head: costTable.head,
-        body: costTable.body,
-        theme: 'grid',
-        headStyles: {
-            fillColor: [52, 152, 219],
-            textColor: 255,
-            fontStyle: 'bold'
-        },
-        styles: {
-            fontSize: 10,
-            cellPadding: 3
-        },
-        margin: { left: 10, right: 10 },
-        footStyles: {
-            fillColor: [44, 62, 80],
-            textColor: 255,
-            fontStyle: 'bold'
+            // Project information
+            doc.setFontSize(12);
+            let y = 35;
+            
+            doc.setFont(undefined, 'bold');
+            doc.text('Project Information', 10, y);
+            doc.setFont(undefined, 'normal');
+            
+            y += 8;
+            doc.text(`Project Name: ${document.getElementById('projectName').value || 'N/A'}`, 10, y);
+            doc.text(`Date: ${document.getElementById('date').value || 'N/A'}`, 110, y);
+            
+            y += 7;
+            doc.text(`Location: ${document.getElementById('projectLocation').value || 'N/A'}`, 10, y);
+            doc.text(`Prepared By: ${document.getElementById('preparedBy').value || 'N/A'}`, 110, y);
+            
+            y += 7;
+            doc.text(`Client: ${document.getElementById('clientName').value || 'N/A'}`, 10, y);
+            doc.text(`Company: ${document.getElementById('companyName').value || 'N/A'}`, 110, y);
+            
+            y += 15;
+            
+            // Wall parameters
+            doc.setFont(undefined, 'bold');
+            doc.text('Wall Parameters', 10, y);
+            doc.setFont(undefined, 'normal');
+            
+            y += 8;
+            doc.text(`Length: ${document.getElementById('wallLengthResult').textContent || 'N/A'}`, 10, y);
+            doc.text(`Height: ${document.getElementById('wallHeightResult').textContent || 'N/A'}`, 60, y);
+            doc.text(`Door Area: ${document.getElementById('doorAreaResult').textContent || 'N/A'}`, 110, y);
+            doc.text(`Window Area: ${document.getElementById('windowAreaResult').textContent || 'N/A'}`, 160, y);
+            
+            y += 7;
+            doc.text(`Total Wall Area: ${document.getElementById('wallArea').textContent || 'N/A'}`, 10, y);
+            
+            y += 15;
+            
+            // Materials summary
+            doc.setFont(undefined, 'bold');
+            doc.text('Materials Summary', 10, y);
+            doc.setFont(undefined, 'normal');
+            
+            y += 8;
+            
+            // Create materials table
+            const materialsTable = {
+                head: [['Material', 'Quantity', 'Cost']],
+                body: resultsData.materials.map(mat => {
+                    const materialType = mat.type;
+                    const unit = materialConfig[Object.keys(materialConfig).find(key => materialConfig[key].name === materialType)]?.unit || 'units';
+                    return [
+                        mat.type,
+                        `${mat.quantity.toFixed(2)} ${unit}`,
+                        `${currencySymbol}${mat.totalCost.toFixed(2)}`
+                    ];
+                })
+            };
+            
+            // Add materials table
+            doc.autoTable({
+                startY: y,
+                head: materialsTable.head,
+                body: materialsTable.body,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [52, 152, 219],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 3
+                },
+                margin: { left: 10, right: 10 }
+            });
+            
+            y = doc.lastAutoTable.finalY + 10;
+            
+            // Check if we need a new page
+            if (y > 250) {
+                doc.addPage();
+                y = 20;
+            }
+            
+            // Cost summary
+            doc.setFont(undefined, 'bold');
+            doc.text('Cost Summary', 10, y);
+            doc.setFont(undefined, 'normal');
+            
+            y += 8;
+            
+            // Create cost summary table
+            const costTable = {
+                head: [['Item', 'Cost', 'Cost/m²']],
+                body: [
+                    [
+                        'Materials',
+                        `${currencySymbol}${document.getElementById('materialCostResult').textContent || '0.00'}`,
+                        `${currencySymbol}${document.getElementById('materialCostSqm').textContent || '0.00'}`
+                    ],
+                    [
+                        'Accessories',
+                        `${currencySymbol}${document.getElementById('accessoryCostResult').textContent || '0.00'}`,
+                        `${currencySymbol}${document.getElementById('accessoryCostSqm').textContent || '0.00'}`
+                    ],
+                    [
+                        'Plastering',
+                        `${currencySymbol}${document.getElementById('plasteringCostResult').textContent || '0.00'}`,
+                        `${currencySymbol}${document.getElementById('plasteringCostSqm').textContent || '0.00'}`
+                    ],
+                    [
+                        'Labor',
+                        `${currencySymbol}${document.getElementById('laborCostResult').textContent || '0.00'}`,
+                        `${currencySymbol}${document.getElementById('laborCostSqm').textContent || '0.00'}`
+                    ],
+                    [
+                        'Contingency',
+                        `${currencySymbol}${document.getElementById('contingencyCostResult').textContent || '0.00'}`,
+                        `${currencySymbol}${document.getElementById('contingencyCostSqm').textContent || '0.00'}`
+                    ],
+                    [
+                        'Overhead',
+                        `${currencySymbol}${document.getElementById('overheadCostResult').textContent || '0.00'}`,
+                        `${currencySymbol}${document.getElementById('overheadCostSqm').textContent || '0.00'}`
+                    ],
+                    [
+                        'Equipment',
+                        `${currencySymbol}${document.getElementById('equipmentCostResult').textContent || '0.00'}`,
+                        `${currencySymbol}${document.getElementById('equipmentCostSqm').textContent || '0.00'}`
+                    ],
+                    [
+                        'Profit',
+                        `${currencySymbol}${document.getElementById('profitCostResult').textContent || '0.00'}`,
+                        `${currencySymbol}${document.getElementById('profitCostSqm').textContent || '0.00'}`
+                    ],
+                    [
+                        'TOTAL',
+                        `${currencySymbol}${document.getElementById('totalCost').textContent || '0.00'}`,
+                        `${currencySymbol}${document.getElementById('totalCostSqm').textContent || '0.00'}`
+                    ]
+                ]
+            };
+            
+            // Add cost summary table
+            doc.autoTable({
+                startY: y,
+                head: costTable.head,
+                body: costTable.body,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [52, 152, 219],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                },
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 3
+                },
+                margin: { left: 10, right: 10 },
+                footStyles: {
+                    fillColor: [44, 62, 80],
+                    textColor: 255,
+                    fontStyle: 'bold'
+                }
+            });
+            
+            y = doc.lastAutoTable.finalY + 10;
+            
+            // Check if we need a new page
+            if (y > 250) {
+                doc.addPage();
+                y = 20;
+            }
+            
+            // Labor details
+            doc.setFont(undefined, 'bold');
+            doc.text('Labor Details', 10, y);
+            doc.setFont(undefined, 'normal');
+            
+            y += 8;
+            doc.text(`Number of Laborers: ${document.getElementById('laborersResult').textContent || 'N/A'}`, 10, y);
+            doc.text(`Productivity Rate: ${document.getElementById('productivityRate').textContent || 'N/A'} m²/day`, 80, y);
+            
+            y += 7;
+            doc.text(`Preparation Time: ${document.getElementById('prepTimeResult').textContent || 'N/A'} days`, 10, y);
+            doc.text(`Installation Time: ${document.getElementById('installTime').textContent || 'N/A'} days`, 80, y);
+            
+            y += 7;
+            doc.text(`Cleanup Time: ${document.getElementById('cleanupTimeResult').textContent || 'N/A'} days`, 10, y);
+            doc.text(`Total Duration: ${document.getElementById('totalDays').textContent || 'N/A'} days`, 80, y);
+            
+            // Add footer with page numbers
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Page ${i} of ${pageCount}`, 200, 290, { align: 'right' });
+                doc.text(`Generated on ${new Date().toLocaleDateString()}`, 10, 290);
+            }
+
+            console.log('PDF generated, saving file');
+            doc.save('wall_materials_calculation.pdf');
         }
-    });
-    
-    y = doc.lastAutoTable.finalY + 10;
-    
-    // Check if we need a new page
-    if (y > 250) {
-        doc.addPage();
-        y = 20;
-    }
-    
-    // Labor details
-    doc.setFont(undefined, 'bold');
-    doc.text('Labor Details', 10, y);
-    doc.setFont(undefined, 'normal');
-    
-    y += 8;
-    doc.text(`Number of Laborers: ${document.getElementById('laborersResult').textContent || 'N/A'}`, 10, y);
-    doc.text(`Productivity Rate: ${document.getElementById('productivityRate').textContent || 'N/A'} m²/day`, 80, y);
-    
-    y += 7;
-    doc.text(`Preparation Time: ${document.getElementById('prepTimeResult').textContent || 'N/A'} days`, 10, y);
-    doc.text(`Installation Time: ${document.getElementById('installTime').textContent || 'N/A'} days`, 80, y);
-    
-    y += 7;
-    doc.text(`Cleanup Time: ${document.getElementById('cleanupTimeResult').textContent || 'N/A'} days`, 10, y);
-    doc.text(`Total Duration: ${document.getElementById('totalDays').textContent || 'N/A'} days`, 80, y);
-    
-    // Add footer with page numbers
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-        doc.setPage(i);
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Page ${i} of ${pageCount}`, 200, 290, { align: 'right' });
-        doc.text(`Generated on ${new Date().toLocaleDateString()}`, 10, 290);
-    }
-
-    console.log('PDF generated, saving file');
-    doc.save('wall_materials_calculation.pdf');
-}
     </script>
 </body>
 </html>
